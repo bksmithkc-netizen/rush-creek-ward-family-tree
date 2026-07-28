@@ -1154,11 +1154,15 @@ const LEVEL_COLOR    = { error:'var(--st-critical)', warn:'var(--st-warning)', o
 // FamilySearch keeps a stable id for every person (_FSFTID in the file), so a name
 // can link straight to that person's page. Verified format; if the reader isn't
 // signed in, FamilySearch asks them to and then delivers them to the right person.
-const FS_PERSON_URL = 'https://www.familysearch.org/tree/person/details/';
-function fsLink(fsid, label, cls){
+// Both tab URLs are verified. Temple names open on Ordinances — that page shows
+// whether each ordinance can actually be requested yet, which our file cannot know.
+// Tree problems open on Details, where dates and names are edited.
+const FS_BASE = 'https://www.familysearch.org/tree/person/';
+function fsLink(fsid, label, cls, tab){
   const safe = String(label==null?'':label).replace(/[&<>"]/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));
   if(!fsid) return `<span class="${cls}">${safe}</span>`;
-  return `<a class="${cls} fslink" href="${FS_PERSON_URL}${encodeURIComponent(fsid)}"
+  const url = FS_BASE + (tab || 'details') + '/' + encodeURIComponent(fsid);
+  return `<a class="${cls} fslink" href="${url}"
      target="_blank" rel="noopener" title="${safe} — FamilySearch">${safe}<span class="fsarrow">↗</span></a>`;
 }
 
@@ -1398,7 +1402,7 @@ function renderTemple(result){
     }).join('');
     el.innerHTML = `
       <div class="pcard-top">
-        ${fsLink(p.fsid, p.name, 'pcard-name')}
+        ${fsLink(p.fsid, p.name, 'pcard-name', 'ordinances')}
         <span class="pcard-yrs">${yrs}</span>
         <span class="pcard-need">${t.needsN.replace('{n}', p.needed)}</span>
       </div>
@@ -1507,7 +1511,7 @@ function renderReport(result){
         if(d.subject){
           row.innerHTML = `
             <div class="row-top">
-              ${fsLink(lastResult.indis?.[f.pid]?.fsid, d.subject, 'row-who')}
+              ${fsLink(lastResult.indis?.[f.pid]?.fsid, d.subject, 'row-who', 'details')}
               ${d.meta ? `<span class="row-meta">${d.meta}</span>` : ''}
             </div>
             <div class="row-issue">${d.issue}</div>
