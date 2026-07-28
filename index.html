@@ -713,7 +713,11 @@ function parseGedcom(text){
         else if(tag==='SEX'){ current.sex = rest.trim(); lastTag=null; }
         else if(tag==='FAMC'){ current.famc.push(rest.trim()); lastTag=null; }
         else if(tag==='FAMS'){ current.fams.push(rest.trim()); lastTag=null; }
-        else if(tag==='_FSFTID'){ current.fsid = rest.trim(); lastTag=null; }
+        else if(FS_ID_TAGS.includes(tag)){
+          const v = rest.trim();
+          if(!current.fsid && FS_ID_SHAPE.test(v)) current.fsid = v;
+          lastTag=null;
+        }
         else if(tag==='BIRT'){ lastTag='BIRT'; }
         else if(tag==='DEAT'){ lastTag='DEAT'; }
         else if(ORD_TAGS.includes(tag)){
@@ -933,6 +937,11 @@ function computeGenerations(indis, fams){
 // localizeFinding() converts to display text using LANG[lang].find + ord names.
 const THIS_YEAR = new Date().getFullYear();
 const ORD_TAGS = ['BAPL','CONL','WAC','INIL','ENDL','SLGC'];
+// The FamilySearch person id is not standard GEDCOM — each program invents its own
+// tag for it. Accept the ones in circulation, and only trust a value that matches the
+// real id shape (four characters, hyphen, three) so a link can never point at nothing.
+const FS_ID_TAGS  = ['_FSFTID','_FID','_FSID','_FSFTID1','RFN','RIN'];
+const FS_ID_SHAPE = /^[A-Z0-9]{4}-[A-Z0-9]{3}$/;
 
 function analyzeTree(text, opts){
   opts = opts || {maxGen:20, checks:{dates:true,ordinances:true,duplicates:true,names:true,marriages:true}};
