@@ -490,23 +490,32 @@ function parseGedcom(text){
     if(!current) return;
 
     if(currentType==='INDI'){
-      if(lvl===1 && tag==='NAME'){ current.name = rest.replace(/\//g,'').trim(); lastTag=null; }
-      else if(lvl===1 && tag==='SEX'){ current.sex = rest.trim(); }
-      else if(lvl===1 && tag==='FAMC'){ current.famc.push(rest.trim()); }
-      else if(lvl===1 && tag==='FAMS'){ current.fams.push(rest.trim()); }
-      else if(lvl===1 && tag==='BIRT'){ lastTag='BIRT'; }
-      else if(lvl===1 && tag==='DEAT'){ lastTag='DEAT'; }
-      else if(lvl===1 && ['BAPL','CONL','ENDL','SLGC'].includes(tag)){ current.ordinances[tag]=true; lastTag=tag; }
+      if(lvl===1){
+        // A level-1 tag always ends the previous event block. Without this reset,
+        // an eventless "1 BIRT" followed later by "1 CHAN / 2 DATE" would record the
+        // record's last-modified date as the person's birth year.
+        if(tag==='NAME'){ current.name = rest.replace(/\//g,'').trim(); lastTag=null; }
+        else if(tag==='SEX'){ current.sex = rest.trim(); lastTag=null; }
+        else if(tag==='FAMC'){ current.famc.push(rest.trim()); lastTag=null; }
+        else if(tag==='FAMS'){ current.fams.push(rest.trim()); lastTag=null; }
+        else if(tag==='BIRT'){ lastTag='BIRT'; }
+        else if(tag==='DEAT'){ lastTag='DEAT'; }
+        else if(['BAPL','CONL','ENDL','SLGC'].includes(tag)){ current.ordinances[tag]=true; lastTag=tag; }
+        else { lastTag=null; }
+      }
       else if(lvl===2 && tag==='DATE'){
         const year = (rest.match(/\d{4}/)||[])[0];
         if(lastTag==='BIRT') current.birt = year?parseInt(year,10):null;
         if(lastTag==='DEAT') current.deat = year?parseInt(year,10):null;
       }
     } else if(currentType==='FAM'){
-      if(lvl===1 && tag==='HUSB'){ current.husb = rest.trim(); }
-      else if(lvl===1 && tag==='WIFE'){ current.wife = rest.trim(); }
-      else if(lvl===1 && tag==='CHIL'){ current.chil.push(rest.trim()); }
-      else if(lvl===1 && tag==='MARR'){ lastTag='MARR'; }
+      if(lvl===1){
+        if(tag==='HUSB'){ current.husb = rest.trim(); lastTag=null; }
+        else if(tag==='WIFE'){ current.wife = rest.trim(); lastTag=null; }
+        else if(tag==='CHIL'){ current.chil.push(rest.trim()); lastTag=null; }
+        else if(tag==='MARR'){ lastTag='MARR'; }
+        else { lastTag=null; }
+      }
       else if(lvl===2 && tag==='DATE' && lastTag==='MARR'){
         const year=(rest.match(/\d{4}/)||[])[0];
         current.marr = year?parseInt(year,10):null;
@@ -594,6 +603,7 @@ function analyzeTree(text, opts){
 
   if(opts.checks.dates){
     people.forEach(p=>{
+      if(p.birt && p.birt > THIS_YEAR) p.birt = null;  // future birth year = bad data, not a real date
       if(!p.birt) findings.push({level:'warn', type:'missingBirth', params:[p.name||'—']});
       // Only flag a missing death date when the person is far too old to still be living —
       // otherwise every living relative in the tree gets flagged for no reason.
