@@ -1,0 +1,800 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rush Creek Ward Family Tree Review</title>
+<style>
+  :root{
+    --navy:#0b2340;
+    --navy-dark:#071627;
+    --navy-light:#123a63;
+    --gold:#c9a548;
+    --gold-light:#e8d19b;
+    --cream:#faf7f0;
+    --gray:#5b6b7d;
+    --red:#b0392f;
+    --green:#3c7a4f;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;
+    background:linear-gradient(180deg,var(--navy) 0%,var(--navy-dark) 100%);
+    color:var(--cream);
+    min-height:100vh;
+  }
+  header{
+    text-align:center;
+    padding:36px 20px 24px;
+    border-bottom:2px solid var(--gold);
+    position:relative;
+  }
+  header .crest{font-size:40px;margin-bottom:6px;}
+  header h1{
+    margin:0;
+    font-size:26px;
+    letter-spacing:0.5px;
+    color:var(--gold-light);
+  }
+  header p{
+    margin:8px 0 0;
+    color:#c9d3de;
+    font-size:15px;
+  }
+  .lang-bar{
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    gap:8px;
+    margin-top:16px;
+    font-size:13px;
+    color:#c9d3de;
+  }
+  .lang-bar select{
+    background:rgba(255,255,255,0.08);
+    color:var(--cream);
+    border:1px solid rgba(255,255,255,0.25);
+    border-radius:8px;
+    padding:6px 10px;
+    font-size:13px;
+  }
+  main{
+    max-width:760px;
+    margin:0 auto;
+    padding:28px 18px 60px;
+  }
+  .steps{
+    display:flex;
+    justify-content:center;
+    gap:8px;
+    margin-bottom:28px;
+    flex-wrap:wrap;
+  }
+  .step-pill{
+    padding:8px 16px;
+    border-radius:20px;
+    background:rgba(255,255,255,0.06);
+    border:1px solid rgba(255,255,255,0.15);
+    font-size:13px;
+    color:#c9d3de;
+    cursor:pointer;
+    transition:all .15s ease;
+  }
+  .step-pill.active{
+    background:var(--gold);
+    color:var(--navy-dark);
+    border-color:var(--gold);
+    font-weight:600;
+  }
+  .card{
+    background:var(--cream);
+    color:#1c2b3a;
+    border-radius:14px;
+    padding:28px;
+    box-shadow:0 10px 30px rgba(0,0,0,0.35);
+  }
+  .card h2{
+    margin-top:0;
+    color:var(--navy);
+    font-size:20px;
+    border-bottom:2px solid var(--gold);
+    padding-bottom:10px;
+  }
+  .dropzone{
+    border:2px dashed #b7a058;
+    border-radius:10px;
+    padding:36px 20px;
+    text-align:center;
+    color:var(--gray);
+    background:#fff9ec;
+    cursor:pointer;
+    transition:background .15s ease;
+  }
+  .dropzone.drag{background:#f3e6c0;}
+  .dropzone strong{display:block;color:var(--navy);font-size:16px;margin-bottom:6px;}
+  input[type=file]{display:none;}
+  .sourceNote{
+    margin-top:10px;
+    text-align:center;
+    font-size:12.5px;
+    color:var(--gray);
+    line-height:1.5;
+  }
+  textarea{
+    width:100%;
+    min-height:180px;
+    border-radius:8px;
+    border:1px solid #cbd3db;
+    padding:14px;
+    font-family:ui-monospace,Menlo,Consolas,monospace;
+    font-size:13px;
+    resize:vertical;
+  }
+  .btn{
+    display:inline-block;
+    background:var(--navy);
+    color:#fff;
+    border:none;
+    padding:12px 22px;
+    border-radius:8px;
+    font-size:15px;
+    font-weight:600;
+    cursor:pointer;
+    margin-top:16px;
+    margin-right:10px;
+  }
+  .btn.gold{background:var(--gold);color:var(--navy-dark);}
+  .btn.outline{background:transparent;color:var(--navy);border:1.5px solid var(--navy);}
+  .btn:hover{opacity:.9;}
+  ol.instructions{padding-left:20px;}
+  ol.instructions li{margin-bottom:12px;line-height:1.5;}
+  .tag{
+    display:inline-block;
+    font-size:12px;
+    background:var(--gold-light);
+    color:#5a4712;
+    padding:2px 8px;
+    border-radius:10px;
+    margin-left:6px;
+  }
+  .hidden{display:none !important;}
+  .finding{
+    border-left:4px solid var(--red);
+    background:#fbeceb;
+    padding:10px 14px;
+    border-radius:6px;
+    margin-bottom:8px;
+    font-size:14px;
+  }
+  .finding.warn{border-left-color:#c98a1f;background:#fdf3e2;}
+  .finding.ok{border-left-color:var(--green);background:#eaf6ec;}
+  .summary-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(120px,1fr));
+    gap:10px;
+    margin:18px 0;
+  }
+  .stat{
+    background:#fff;
+    border:1px solid #e2e6ea;
+    border-radius:10px;
+    padding:14px;
+    text-align:center;
+  }
+  .stat .num{font-size:24px;font-weight:700;color:var(--navy);}
+  .stat .lbl{font-size:12px;color:var(--gray);margin-top:2px;}
+  footer{
+    text-align:center;
+    color:#8fa0b3;
+    font-size:12px;
+    padding:20px;
+  }
+  .sample-link{color:var(--gold-light);text-decoration:underline;cursor:pointer;font-size:13px;}
+  .scan-opts label{font-size:13px;}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="crest">⛪</div>
+  <h1 id="t_title">Rush Creek Ward Family Tree Review</h1>
+  <p id="t_subtitle">Free family tree error check for any Church member — powered by Claude</p>
+  <div class="lang-bar">
+    <span id="t_langLabel">Language:</span>
+    <select id="langSelect">
+      <option value="en">English</option>
+      <option value="es">Español</option>
+      <option value="pt">Português</option>
+      <option value="fr">Français</option>
+      <option value="de">Deutsch</option>
+      <option value="tl">Tagalog</option>
+      <option value="sm">Gagana Samoa</option>
+      <option value="ja">日本語</option>
+    </select>
+  </div>
+</header>
+
+<main>
+  <div class="steps">
+    <div class="step-pill active" data-tab="upload" id="t_tab1">1. Upload GEDCOM</div>
+    <div class="step-pill" data-tab="paste" id="t_tab2">2. Paste Family Info</div>
+    <div class="step-pill" data-tab="howto" id="t_tab3">3. How to Get a GEDCOM</div>
+    <div class="step-pill" data-tab="signin"><span id="t_tab4">4. Sign in w/ FamilySearch</span> <span class="tag" id="t_comingSoon">coming soon</span></div>
+  </div>
+
+  <!-- SHARED: Scan Options -->
+  <div class="card scan-opts" id="scanOptions" style="margin-bottom:18px;">
+    <h2 style="border:none;padding-bottom:0;margin-bottom:4px;" id="t_scanOptionsTitle">Scan Options</h2>
+    <div style="margin:18px 0 10px;">
+      <label style="font-weight:600;color:var(--navy);font-size:14px;"><span id="t_genLabel">Generations to scan back:</span> <span id="genValueLabel">4</span></label>
+      <input type="range" id="genSlider" min="1" max="20" value="4" style="width:100%;margin-top:10px;accent-color:#c9a548;">
+      <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--gray);margin-top:2px;">
+        <span id="t_genMin">1 (just me)</span><span id="t_genMax">8 (great-great-great-great-grandparents)</span>
+      </div>
+    </div>
+    <div style="display:flex;flex-wrap:wrap;gap:14px;margin-top:14px;">
+      <label><input type="checkbox" class="opt-check" data-opt="dates" checked> <span id="t_checkDates">Impossible / missing dates</span></label>
+      <label><input type="checkbox" class="opt-check" data-opt="ordinances" checked> <span id="t_checkOrdinances">Missing LDS ordinances</span></label>
+      <label><input type="checkbox" class="opt-check" data-opt="duplicates" checked> <span id="t_checkDuplicates">Duplicate individuals</span></label>
+      <label><input type="checkbox" class="opt-check" data-opt="names" checked> <span id="t_checkNames">Incomplete names</span></label>
+      <label><input type="checkbox" class="opt-check" data-opt="marriages" checked> <span id="t_checkMarriages">Marriage / family errors</span></label>
+    </div>
+  </div>
+
+  <!-- TAB: Upload -->
+  <div class="card tab-panel" id="tab-upload">
+    <h2 id="t_uploadTitle">Upload your GEDCOM file</h2>
+    <div class="dropzone" id="dropzone">
+      <strong id="t_dropzoneMain">Drag &amp; drop your .ged file here</strong>
+      <span id="t_dropzoneSub">or click to choose a file</span>
+      <input type="file" id="fileInput" accept=".ged,.gedcom,text/plain">
+    </div>
+    <div class="sourceNote" id="t_sourceNote">Works automatically from your computer, USB drive, phone, or any cloud-synced folder (Google Drive, iCloud, Dropbox) — no extra steps.</div>
+    <p style="margin-top:14px;font-size:13px;color:var(--gray)">
+      <span id="t_noFileYet">Don't have a GEDCOM file yet? No problem —</span>
+      <span class="sample-link" id="loadSample"><span id="t_sampleLink">click here to load a sample tree</span></span> <span id="t_sampleLinkEnd">and see exactly what the report looks like.</span>
+    </p>
+    <button class="btn gold" id="analyzeUpload"><span id="t_analyzeBtn1">Analyze My Tree</span></button>
+  </div>
+
+  <!-- TAB: Paste -->
+  <div class="card tab-panel hidden" id="tab-paste">
+    <h2 id="t_pasteTitle">Paste your family information</h2>
+    <p style="font-size:13px;color:var(--gray)" id="t_pasteSub">Paste raw GEDCOM text, or just type names/dates in plain language (e.g. "John Smith, b. 1902, d. 1965, married Mary Jones 1925").</p>
+    <textarea id="pasteArea" placeholder="Paste family tree info here..."></textarea>
+    <button class="btn gold" id="analyzePaste"><span id="t_analyzeBtn2">Analyze My Tree</span></button>
+  </div>
+
+  <!-- TAB: How-To -->
+  <div class="card tab-panel hidden" id="tab-howto">
+    <h2 id="t_howtoTitle">How to get a GEDCOM file from FamilySearch</h2>
+    <p style="font-size:13.5px;color:var(--gray);margin-top:-4px;" id="t_howtoIntro">You don't need to be a computer expert for this. Just follow each step below, in order. It takes about 15–20 minutes, plus some waiting time while your tree downloads.</p>
+    <ol class="instructions">
+      <li id="t_howto1">Go to ancquest.com and download "Ancestral Quest Basics." It's free, and it works on both Windows and Mac computers.</li>
+      <li id="t_howto2">Open Ancestral Quest. Right on the first screen (or under the "FamilySearch" menu at the top), choose "Import from FamilySearch."</li>
+      <li id="t_howto3">Type in your FamilySearch username and password when it asks. If it offers to back up your tree first, choose Yes.</li>
+      <li id="t_howto4">Choose how many generations back you'd like (8–20 is great). Click Import, then wait — for a large family this can take up to an hour. If it looks frozen or says "FamilySearch is Busy... retrying," that's completely normal. Don't close the program.</li>
+      <li id="t_howto5">When it's done, click "File" at the top, then "Export." Choose GEDCOM as the file type, then save it somewhere easy to find, like your Desktop — name it something like family-tree.ged.</li>
+      <li id="t_howto6">Come back here and upload that file on the "Upload GEDCOM" tab above.</li>
+    </ol>
+    <p style="font-size:13px;color:var(--gray)" id="t_howtoAlt">FamilySearch itself confirms it doesn't offer a direct download button for your Family Tree — you always need a helper program like this. Ancestral Quest is one of FamilySearch's official certified partners, so it's a safe, well-tested choice. RootsMagic and Legacy Family Tree are two other well-known certified options if you'd rather try those instead.</p>
+  </div>
+
+  <!-- TAB: Sign in (coming soon) -->
+  <div class="card tab-panel hidden" id="tab-signin">
+    <h2 id="t_signinTitle">Sign in with FamilySearch</h2>
+    <p id="t_signinBody">This is the goal: click one button, log in with your Church account, and get your report — no file, no software.</p>
+    <p style="font-size:13px;color:var(--gray)" id="t_signinNote">This requires an official FamilySearch API key, which is currently in review. Once approved, this tab goes live automatically — everything else on this site is already built and ready.</p>
+    <button class="btn outline" disabled><span id="t_signinBtn">Sign in with FamilySearch (pending API approval)</span></button>
+  </div>
+
+  <!-- REPORT -->
+  <div class="card report hidden" id="reportCard">
+    <h2 id="t_reportTitle">📋 Family Tree Review Report</h2>
+    <div class="summary-grid" id="summaryGrid"></div>
+    <div id="findingsList"></div>
+    <button class="btn gold" id="copyReport"><span id="t_copyBtn">Copy Report</span></button>
+    <button class="btn outline" id="startOver"><span id="t_startOverBtn">Start Over</span></button>
+  </div>
+</main>
+
+<footer id="t_footer">Built for Rush Creek Ward — free for any Church member. No data is stored; everything runs in your browser.</footer>
+
+<script>
+// ============================================================
+// LANGUAGE DATA
+// ============================================================
+const LANG = {
+en:{ui:{title:"Rush Creek Ward Family Tree Review",subtitle:"Free family tree error check for any Church member — powered by Claude",langLabel:"Language:",tab1:"1. Upload GEDCOM",tab2:"2. Paste Family Info",tab3:"3. How to Get a GEDCOM",tab4:"4. Sign in w/ FamilySearch",comingSoon:"coming soon",scanOptionsTitle:"Scan Options",genLabel:"Generations to scan back:",genMin:"1 (just me)",genMax:"20 (as far back as it goes)",checkDates:"Impossible / missing dates",checkOrdinances:"Missing LDS ordinances",checkDuplicates:"Duplicate individuals",checkNames:"Incomplete names",checkMarriages:"Marriage / family errors",uploadTitle:"Upload your GEDCOM file",dropzoneMain:"Drag & drop your .ged file here",dropzoneSub:"or click to choose a file",noFileYet:"Don't have a GEDCOM file yet? No problem —",sampleLink:"click here to load a sample tree",sampleLinkEnd:"and see exactly what the report looks like.",analyzeBtn:"Analyze My Tree",pasteTitle:"Paste your family information",pasteSub:'Paste raw GEDCOM text, or just type names/dates in plain language (e.g. "John Smith, b. 1902, d. 1965, married Mary Jones 1925").',pastePlaceholder:"Paste family tree info here...",howtoTitle:"How to get a GEDCOM file from FamilySearch",howtoIntro:"You don't need to be a computer expert for this. Just follow each step below, in order. It takes about 15–20 minutes, plus some waiting time while your tree downloads.",howto1:"Go to ancquest.com and download \"Ancestral Quest Basics.\" It's free, and it works on both Windows and Mac computers.",howto2:"Open Ancestral Quest. Right on the first screen (or under the \"FamilySearch\" menu at the top), choose \"Import from FamilySearch.\"",howto3:"Type in your FamilySearch username and password when it asks. If it offers to back up your tree first, choose Yes.",howto4:"Choose how many generations back you'd like (8–20 is great). Click Import, then wait — for a large family this can take up to an hour. If it looks frozen or says \"FamilySearch is Busy... retrying,\" that's completely normal. Don't close the program.",howto5:"When it's done, click \"File\" at the top, then \"Export.\" Choose GEDCOM as the file type, then save it somewhere easy to find, like your Desktop — name it something like family-tree.ged.",howto6:"Come back here and upload that file on the \"Upload GEDCOM\" tab above.",howtoAlt:"FamilySearch itself confirms it doesn't offer a direct download button for your Family Tree — you always need a helper program like this. Ancestral Quest is one of FamilySearch's official certified partners, so it's a safe, well-tested choice. RootsMagic and Legacy Family Tree are two other well-known certified options if you'd rather try those instead.",signinTitle:"Sign in with FamilySearch",signinBody:"This is the goal: click one button, log in with your Church account, and get your report — no file, no software.",signinNote:"This requires an official FamilySearch API key, which is currently in review. Once approved, this tab goes live automatically — everything else on this site is already built and ready.",signinBtn:"Sign in with FamilySearch (pending API approval)",reportTitle:"📋 Family Tree Review Report",statPeople:"People Found",statErrors:"Errors",statWarnings:"Warnings",statClean:"Clean",copyBtn:"Copy Report",startOverBtn:"Start Over",footer:"Built for Rush Creek Ward — free for any Church member. No data is stored; everything runs in your browser.",sourceNote:"Works automatically from your computer, USB drive, phone, or any cloud-synced folder (Google Drive, iCloud, Dropbox) — no extra steps.",showAll:"Show all {n} findings",ord:{baptism:"baptism",confirmation:"confirmation",endowment:"endowment"}},
+find:{noIndividuals:"No individuals (INDI records) were found. If you pasted plain text instead of a GEDCOM file, the checker did its best — for full accuracy, upload an actual .ged file.",missingBirth:n=>`${n}: missing birth date.`,missingDeath:n=>`${n}: missing death date (may still be living, but worth confirming).`,deathBeforeBirth:(n,d,b)=>`${n}: death year (${d}) is before birth year (${b}) — impossible date.`,longLife:(n,y)=>`${n}: lived ${y} years — unusually long, worth double-checking.`,missingOrdinances:(n,l)=>`${n}: missing ordinance record(s) — ${l}.`,incompleteNameRecord:id=>`Record ${id}: name is missing or incomplete.`,incompleteNameLooks:n=>`${n}: name looks incomplete (initials only or missing surname).`,duplicate:(n,b,i1,i2)=>`Possible duplicate: two records for "${n}" (born ${b}) — ${i1} and ${i2}.`,childBeforeParent:(c,cb,p,pb)=>`${c}: born ${cb}, same year or before parent ${p} (born ${pb}) — impossible.`,childTooClose:(c,g,p)=>`${c}: born only ${g} years after parent ${p} — please verify.`,marriageBeforeBirth:(s,m,b)=>`${s}: marriage year (${m}) is before their own birth year (${b}) — impossible.`,excluded:(c,mg)=>`${c} additional individual(s) fall outside the ${mg}-generation range you selected and were not scanned. Increase the slider to include them.`,clean:"No issues found — this tree looks clean!"}},
+es:{ui:{title:"Revisión del Árbol Familiar del Barrio Rush Creek",subtitle:"Revisión gratuita de errores en el árbol familiar para cualquier miembro de la Iglesia — impulsado por Claude",langLabel:"Idioma:",tab1:"1. Subir GEDCOM",tab2:"2. Pegar Información Familiar",tab3:"3. Cómo Obtener un GEDCOM",tab4:"4. Iniciar Sesión con FamilySearch",comingSoon:"próximamente",scanOptionsTitle:"Opciones de Escaneo",genLabel:"Generaciones a escanear:",genMin:"1 (solo yo)",genMax:"20 (tan atrás como sea posible)",checkDates:"Fechas imposibles o faltantes",checkOrdinances:"Ordenanzas SUD faltantes",checkDuplicates:"Personas duplicadas",checkNames:"Nombres incompletos",checkMarriages:"Errores de matrimonio / familia",uploadTitle:"Sube tu archivo GEDCOM",dropzoneMain:"Arrastra y suelta tu archivo .ged aquí",dropzoneSub:"o haz clic para elegir un archivo",noFileYet:"¿Aún no tienes un archivo GEDCOM? No hay problema —",sampleLink:"haz clic aquí para cargar un árbol de muestra",sampleLinkEnd:"y ve exactamente cómo se ve el informe.",analyzeBtn:"Analizar Mi Árbol",pasteTitle:"Pega tu información familiar",pasteSub:'Pega texto GEDCOM sin procesar, o simplemente escribe nombres/fechas en lenguaje sencillo (ej. "Juan Pérez, n. 1902, f. 1965, casado con María López en 1925").',pastePlaceholder:"Pega la información del árbol familiar aquí...",howtoTitle:"Cómo obtener un archivo GEDCOM de FamilySearch",howtoIntro:"No necesitas ser experto en computadoras para esto. Solo sigue cada paso en orden. Toma unos 15–20 minutos, más algo de tiempo de espera mientras se descarga tu árbol.",howto1:"Ve a ancquest.com y descarga \"Ancestral Quest Basics\". Es gratis, y funciona tanto en Windows como en Mac.",howto2:"Abre Ancestral Quest. En la primera pantalla (o en el menú \"FamilySearch\" en la parte superior), elige \"Import from FamilySearch\" (Importar desde FamilySearch).",howto3:"Escribe tu usuario y contraseña de FamilySearch cuando te lo pida. Si te ofrece hacer una copia de seguridad de tu árbol primero, elige Sí.",howto4:"Elige cuántas generaciones hacia atrás quieres (8–20 está muy bien). Haz clic en Import (Importar) y espera — para un árbol grande esto puede tardar hasta una hora. Si parece congelado o dice \"FamilySearch is Busy... retrying\", es completamente normal. No cierres el programa.",howto5:"Cuando termine, haz clic en \"File\" (Archivo) arriba, luego en \"Export\" (Exportar). Elige GEDCOM como tipo de archivo, y guárdalo en un lugar fácil de encontrar, como tu Escritorio — ponle un nombre como family-tree.ged.",howto6:"Regresa aquí y sube ese archivo en la pestaña \"Subir GEDCOM\" de arriba.",howtoAlt:"FamilySearch mismo confirma que no ofrece un botón de descarga directa para tu Árbol Familiar — siempre necesitas un programa ayudante como este. Ancestral Quest es uno de los socios certificados oficiales de FamilySearch, así que es una opción segura y bien probada. RootsMagic y Legacy Family Tree son otras dos opciones certificadas conocidas si prefieres probar esas.",signinTitle:"Iniciar sesión con FamilySearch",signinBody:"Esta es la meta: haz clic en un botón, inicia sesión con tu cuenta de la Iglesia, y obtén tu informe — sin archivos, sin software.",signinNote:"Esto requiere una clave API oficial de FamilySearch, que está actualmente en revisión. Una vez aprobada, esta pestaña se activará automáticamente — todo lo demás en este sitio ya está construido y listo.",signinBtn:"Iniciar sesión con FamilySearch (aprobación de API pendiente)",reportTitle:"📋 Informe de Revisión del Árbol Familiar",statPeople:"Personas Encontradas",statErrors:"Errores",statWarnings:"Advertencias",statClean:"Sin Problemas",copyBtn:"Copiar Informe",startOverBtn:"Empezar de Nuevo",footer:"Creado para el Barrio Rush Creek — gratis para cualquier miembro de la Iglesia. No se almacenan datos; todo funciona en tu navegador.",sourceNote:"Funciona automáticamente desde tu computadora, unidad USB, teléfono, o cualquier carpeta sincronizada en la nube (Google Drive, iCloud, Dropbox) — sin pasos adicionales.",showAll:"Mostrar los {n} hallazgos",ord:{baptism:"bautismo",confirmation:"confirmación",endowment:"investidura"}},
+find:{noIndividuals:"No se encontraron personas (registros INDI). Si pegaste texto simple en lugar de un archivo GEDCOM, el revisor hizo lo posible — para mayor precisión, sube un archivo .ged real.",missingBirth:n=>`${n}: falta la fecha de nacimiento.`,missingDeath:n=>`${n}: falta la fecha de fallecimiento (puede estar vivo/a, pero vale la pena confirmar).`,deathBeforeBirth:(n,d,b)=>`${n}: el año de fallecimiento (${d}) es anterior al año de nacimiento (${b}) — fecha imposible.`,longLife:(n,y)=>`${n}: vivió ${y} años — inusualmente largo, vale la pena verificar.`,missingOrdinances:(n,l)=>`${n}: faltan registros de ordenanzas — ${l}.`,incompleteNameRecord:id=>`Registro ${id}: el nombre falta o está incompleto.`,incompleteNameLooks:n=>`${n}: el nombre parece incompleto (solo iniciales o falta el apellido).`,duplicate:(n,b,i1,i2)=>`Posible duplicado: dos registros para "${n}" (nacido/a en ${b}) — ${i1} y ${i2}.`,childBeforeParent:(c,cb,p,pb)=>`${c}: nació en ${cb}, el mismo año o antes que su padre/madre ${p} (nacido/a en ${pb}) — imposible.`,childTooClose:(c,g,p)=>`${c}: nació solo ${g} años después de su padre/madre ${p} — por favor verifica.`,marriageBeforeBirth:(s,m,b)=>`${s}: el año de matrimonio (${m}) es anterior a su propio nacimiento (${b}) — imposible.`,excluded:(c,mg)=>`${c} persona(s) adicionales están fuera del rango de ${mg} generaciones seleccionado y no fueron escaneadas. Aumenta el control deslizante para incluirlas.`,clean:"¡No se encontraron problemas — este árbol se ve limpio!"}},
+pt:{ui:{title:"Revisão da Árvore Genealógica da Ala Rush Creek",subtitle:"Verificação gratuita de erros na árvore genealógica para qualquer membro da Igreja — desenvolvido com Claude",langLabel:"Idioma:",tab1:"1. Enviar GEDCOM",tab2:"2. Colar Informações da Família",tab3:"3. Como Obter um GEDCOM",tab4:"4. Entrar com FamilySearch",comingSoon:"em breve",scanOptionsTitle:"Opções de Verificação",genLabel:"Gerações para verificar:",genMin:"1 (só eu)",genMax:"20 (o mais longe possível)",checkDates:"Datas impossíveis / ausentes",checkOrdinances:"Ordenanças SUD ausentes",checkDuplicates:"Indivíduos duplicados",checkNames:"Nomes incompletos",checkMarriages:"Erros de casamento / família",uploadTitle:"Envie seu arquivo GEDCOM",dropzoneMain:"Arraste e solte seu arquivo .ged aqui",dropzoneSub:"ou clique para escolher um arquivo",noFileYet:"Ainda não tem um arquivo GEDCOM? Sem problema —",sampleLink:"clique aqui para carregar uma árvore de exemplo",sampleLinkEnd:"e veja exatamente como fica o relatório.",analyzeBtn:"Analisar Minha Árvore",pasteTitle:"Cole as informações da sua família",pasteSub:'Cole texto GEDCOM bruto, ou apenas digite nomes/datas em linguagem simples (ex. "João Silva, n. 1902, f. 1965, casou com Maria Souza em 1925").',pastePlaceholder:"Cole as informações da árvore genealógica aqui...",howtoTitle:"Como obter um arquivo GEDCOM do FamilySearch",howtoIntro:"Você não precisa ser especialista em computadores para isso. Basta seguir cada passo abaixo, em ordem. Leva cerca de 15–20 minutos, mais algum tempo de espera enquanto sua árvore é baixada.",howto1:"Acesse ancquest.com e baixe o \"Ancestral Quest Basics\". É gratuito e funciona tanto em Windows quanto em Mac.",howto2:"Abra o Ancestral Quest. Logo na primeira tela (ou no menu \"FamilySearch\" no topo), escolha \"Import from FamilySearch\" (Importar do FamilySearch).",howto3:"Digite seu usuário e senha do FamilySearch quando for solicitado. Se ele oferecer para fazer backup da sua árvore primeiro, escolha Sim.",howto4:"Escolha quantas gerações para trás você quer (8–20 é ótimo). Clique em Import (Importar) e aguarde — para uma família grande isso pode levar até uma hora. Se parecer travado ou disser \"FamilySearch is Busy... retrying\", isso é completamente normal. Não feche o programa.",howto5:"Quando terminar, clique em \"File\" (Arquivo) no topo, depois em \"Export\" (Exportar). Escolha GEDCOM como tipo de arquivo, e salve em um lugar fácil de encontrar, como a Área de Trabalho — dê um nome como family-tree.ged.",howto6:"Volte aqui e envie esse arquivo na aba \"Enviar GEDCOM\" acima.",howtoAlt:"O próprio FamilySearch confirma que não oferece um botão de download direto da sua Árvore Genealógica — você sempre precisa de um programa auxiliar como este. O Ancestral Quest é um dos parceiros certificados oficiais do FamilySearch, então é uma escolha segura e bem testada. RootsMagic e Legacy Family Tree são outras duas opções certificadas conhecidas, caso prefira experimentá-las.",signinTitle:"Entrar com FamilySearch",signinBody:"Este é o objetivo: clique em um botão, entre com sua conta da Igreja, e receba seu relatório — sem arquivo, sem software.",signinNote:"Isso requer uma chave de API oficial do FamilySearch, que está atualmente em análise. Uma vez aprovada, esta aba será ativada automaticamente — tudo mais neste site já está pronto.",signinBtn:"Entrar com FamilySearch (aprovação de API pendente)",reportTitle:"📋 Relatório de Revisão da Árvore Genealógica",statPeople:"Pessoas Encontradas",statErrors:"Erros",statWarnings:"Avisos",statClean:"Sem Problemas",copyBtn:"Copiar Relatório",startOverBtn:"Começar de Novo",footer:"Criado para a Ala Rush Creek — grátis para qualquer membro da Igreja. Nenhum dado é armazenado; tudo roda no seu navegador.",sourceNote:"Funciona automaticamente a partir do seu computador, pendrive USB, telefone, ou qualquer pasta sincronizada na nuvem (Google Drive, iCloud, Dropbox) — sem etapas extras.",showAll:"Mostrar todos os {n} resultados",ord:{baptism:"batismo",confirmation:"confirmação",endowment:"investidura"}},
+find:{noIndividuals:"Nenhum indivíduo (registro INDI) foi encontrado. Se você colou texto simples em vez de um arquivo GEDCOM, o verificador fez o possível — para maior precisão, envie um arquivo .ged real.",missingBirth:n=>`${n}: data de nascimento ausente.`,missingDeath:n=>`${n}: data de falecimento ausente (pode estar vivo(a), mas vale confirmar).`,deathBeforeBirth:(n,d,b)=>`${n}: o ano de falecimento (${d}) é anterior ao ano de nascimento (${b}) — data impossível.`,longLife:(n,y)=>`${n}: viveu ${y} anos — incomumente longo, vale verificar.`,missingOrdinances:(n,l)=>`${n}: registros de ordenanças ausentes — ${l}.`,incompleteNameRecord:id=>`Registro ${id}: nome ausente ou incompleto.`,incompleteNameLooks:n=>`${n}: nome parece incompleto (apenas iniciais ou sobrenome ausente).`,duplicate:(n,b,i1,i2)=>`Possível duplicata: dois registros para "${n}" (nascido(a) em ${b}) — ${i1} e ${i2}.`,childBeforeParent:(c,cb,p,pb)=>`${c}: nasceu em ${cb}, mesmo ano ou antes do pai/mãe ${p} (nascido(a) em ${pb}) — impossível.`,childTooClose:(c,g,p)=>`${c}: nasceu apenas ${g} anos após o pai/mãe ${p} — por favor verifique.`,marriageBeforeBirth:(s,m,b)=>`${s}: o ano do casamento (${m}) é anterior ao seu próprio nascimento (${b}) — impossível.`,excluded:(c,mg)=>`${c} indivíduo(s) adicional(is) estão fora do intervalo de ${mg} gerações selecionado e não foram verificados. Aumente o controle deslizante para incluí-los.`,clean:"Nenhum problema encontrado — esta árvore parece limpa!"}},
+fr:{ui:{title:"Révision de l'Arbre Généalogique de la Paroisse Rush Creek",subtitle:"Vérification gratuite des erreurs de l'arbre généalogique pour tout membre de l'Église — propulsé par Claude",langLabel:"Langue :",tab1:"1. Télécharger GEDCOM",tab2:"2. Coller les Informations Familiales",tab3:"3. Comment Obtenir un GEDCOM",tab4:"4. Se Connecter avec FamilySearch",comingSoon:"bientôt disponible",scanOptionsTitle:"Options d'Analyse",genLabel:"Générations à analyser :",genMin:"1 (juste moi)",genMax:"20 (aussi loin que possible)",checkDates:"Dates impossibles / manquantes",checkOrdinances:"Ordonnances SDJ manquantes",checkDuplicates:"Individus en double",checkNames:"Noms incomplets",checkMarriages:"Erreurs de mariage / famille",uploadTitle:"Téléchargez votre fichier GEDCOM",dropzoneMain:"Glissez-déposez votre fichier .ged ici",dropzoneSub:"ou cliquez pour choisir un fichier",noFileYet:"Vous n'avez pas encore de fichier GEDCOM ? Pas de problème —",sampleLink:"cliquez ici pour charger un arbre exemple",sampleLinkEnd:"et voyez exactement à quoi ressemble le rapport.",analyzeBtn:"Analyser Mon Arbre",pasteTitle:"Collez vos informations familiales",pasteSub:'Collez du texte GEDCOM brut, ou tapez simplement des noms/dates en langage courant (ex. "Jean Dupont, né en 1902, décédé en 1965, marié à Marie Martin en 1925").',pastePlaceholder:"Collez les informations de l'arbre généalogique ici...",howtoTitle:"Comment obtenir un fichier GEDCOM depuis FamilySearch",howtoIntro:"Vous n'avez pas besoin d'être un expert en informatique pour cela. Suivez simplement chaque étape ci-dessous, dans l'ordre. Cela prend environ 15 à 20 minutes, plus un peu d'attente pendant le téléchargement de votre arbre.",howto1:"Allez sur ancquest.com et téléchargez \"Ancestral Quest Basics\". C'est gratuit, et cela fonctionne sur Windows et sur Mac.",howto2:"Ouvrez Ancestral Quest. Dès le premier écran (ou dans le menu \"FamilySearch\" en haut), choisissez \"Import from FamilySearch\" (Importer depuis FamilySearch).",howto3:"Entrez votre nom d'utilisateur et votre mot de passe FamilySearch lorsqu'on vous le demande. S'il propose de sauvegarder votre arbre d'abord, choisissez Oui.",howto4:"Choisissez combien de générations en arrière vous voulez (8 à 20, c'est très bien). Cliquez sur Import, puis attendez — pour une grande famille, cela peut prendre jusqu'à une heure. Si cela semble figé ou affiche \"FamilySearch is Busy... retrying\", c'est tout à fait normal. Ne fermez pas le programme.",howto5:"Une fois terminé, cliquez sur \"File\" (Fichier) en haut, puis sur \"Export\" (Exporter). Choisissez GEDCOM comme type de fichier, puis enregistrez-le à un endroit facile à retrouver, comme votre Bureau — donnez-lui un nom comme family-tree.ged.",howto6:"Revenez ici et téléchargez ce fichier dans l'onglet \"Télécharger GEDCOM\" ci-dessus.",howtoAlt:"FamilySearch lui-même confirme qu'il n'offre pas de bouton de téléchargement direct pour votre Arbre Généalogique — il vous faut toujours un programme auxiliaire comme celui-ci. Ancestral Quest est l'un des partenaires certifiés officiels de FamilySearch, donc c'est un choix sûr et bien éprouvé. RootsMagic et Legacy Family Tree sont deux autres options certifiées connues si vous préférez les essayer.",signinTitle:"Se connecter avec FamilySearch",signinBody:"C'est l'objectif : cliquez sur un bouton, connectez-vous avec votre compte de l'Église, et obtenez votre rapport — sans fichier, sans logiciel.",signinNote:"Cela nécessite une clé API officielle FamilySearch, actuellement en cours d'examen. Une fois approuvé, cet onglet s'activera automatiquement — tout le reste sur ce site est déjà prêt.",signinBtn:"Se connecter avec FamilySearch (approbation API en attente)",reportTitle:"📋 Rapport de Révision de l'Arbre Généalogique",statPeople:"Personnes Trouvées",statErrors:"Erreurs",statWarnings:"Avertissements",statClean:"Sans Problème",copyBtn:"Copier le Rapport",startOverBtn:"Recommencer",footer:"Créé pour la paroisse Rush Creek — gratuit pour tout membre de l'Église. Aucune donnée n'est stockée ; tout fonctionne dans votre navigateur.",sourceNote:"Fonctionne automatiquement depuis votre ordinateur, clé USB, téléphone, ou tout dossier synchronisé dans le cloud (Google Drive, iCloud, Dropbox) — sans étape supplémentaire.",showAll:"Afficher les {n} résultats",ord:{baptism:"baptême",confirmation:"confirmation",endowment:"dotation"}},
+find:{noIndividuals:"Aucun individu (enregistrement INDI) n'a été trouvé. Si vous avez collé du texte simple au lieu d'un fichier GEDCOM, le vérificateur a fait de son mieux — pour plus de précision, téléchargez un vrai fichier .ged.",missingBirth:n=>`${n} : date de naissance manquante.`,missingDeath:n=>`${n} : date de décès manquante (peut-être encore vivant(e), mais à confirmer).`,deathBeforeBirth:(n,d,b)=>`${n} : l'année de décès (${d}) précède l'année de naissance (${b}) — date impossible.`,longLife:(n,y)=>`${n} : a vécu ${y} ans — inhabituellement long, à vérifier.`,missingOrdinances:(n,l)=>`${n} : ordonnance(s) manquante(s) — ${l}.`,incompleteNameRecord:id=>`Enregistrement ${id} : nom manquant ou incomplet.`,incompleteNameLooks:n=>`${n} : le nom semble incomplet (initiales seulement ou nom de famille manquant).`,duplicate:(n,b,i1,i2)=>`Doublon possible : deux enregistrements pour « ${n} » (né(e) en ${b}) — ${i1} et ${i2}.`,childBeforeParent:(c,cb,p,pb)=>`${c} : né(e) en ${cb}, la même année ou avant son parent ${p} (né(e) en ${pb}) — impossible.`,childTooClose:(c,g,p)=>`${c} : né(e) seulement ${g} ans après son parent ${p} — veuillez vérifier.`,marriageBeforeBirth:(s,m,b)=>`${s} : l'année de mariage (${m}) précède sa propre naissance (${b}) — impossible.`,excluded:(c,mg)=>`${c} individu(s) supplémentaire(s) se trouvent en dehors de la plage de ${mg} générations sélectionnée et n'ont pas été analysés. Augmentez le curseur pour les inclure.`,clean:"Aucun problème trouvé — cet arbre est propre !"}},
+de:{ui:{title:"Familienstammbaum-Überprüfung der Rush Creek Gemeinde",subtitle:"Kostenlose Fehlerprüfung des Familienstammbaums für jedes Kirchenmitglied — unterstützt von Claude",langLabel:"Sprache:",tab1:"1. GEDCOM Hochladen",tab2:"2. Familieninformationen Einfügen",tab3:"3. Wie man ein GEDCOM Bekommt",tab4:"4. Mit FamilySearch Anmelden",comingSoon:"demnächst",scanOptionsTitle:"Scan-Optionen",genLabel:"Generationen zurück scannen:",genMin:"1 (nur ich)",genMax:"20 (so weit wie möglich zurück)",checkDates:"Unmögliche / fehlende Daten",checkOrdinances:"Fehlende HLT-Ordinanzen",checkDuplicates:"Doppelte Personen",checkNames:"Unvollständige Namen",checkMarriages:"Ehe-/Familienfehler",uploadTitle:"Laden Sie Ihre GEDCOM-Datei hoch",dropzoneMain:"Ziehen Sie Ihre .ged-Datei hierher",dropzoneSub:"oder klicken Sie, um eine Datei auszuwählen",noFileYet:"Noch keine GEDCOM-Datei? Kein Problem —",sampleLink:"klicken Sie hier, um einen Beispielstammbaum zu laden",sampleLinkEnd:"und sehen Sie genau, wie der Bericht aussieht.",analyzeBtn:"Meinen Stammbaum Analysieren",pasteTitle:"Fügen Sie Ihre Familieninformationen ein",pasteSub:'Fügen Sie rohen GEDCOM-Text ein oder geben Sie einfach Namen/Daten in einfacher Sprache ein (z.B. "Johann Schmidt, geb. 1902, gest. 1965, heiratete Maria Müller 1925").',pastePlaceholder:"Fügen Sie hier Stammbaum-Informationen ein...",howtoTitle:"So erhalten Sie eine GEDCOM-Datei von FamilySearch",howtoIntro:"Sie müssen dafür kein Computerexperte sein. Folgen Sie einfach jedem Schritt unten, der Reihe nach. Es dauert etwa 15–20 Minuten, plus etwas Wartezeit, während Ihr Stammbaum heruntergeladen wird.",howto1:"Gehen Sie zu ancquest.com und laden Sie \"Ancestral Quest Basics\" herunter. Es ist kostenlos und funktioniert sowohl unter Windows als auch auf dem Mac.",howto2:"Öffnen Sie Ancestral Quest. Gleich auf dem ersten Bildschirm (oder im Menü \"FamilySearch\" oben) wählen Sie \"Import from FamilySearch\" (Von FamilySearch importieren).",howto3:"Geben Sie Ihren FamilySearch-Benutzernamen und Ihr Passwort ein, wenn Sie danach gefragt werden. Wenn angeboten wird, zuerst eine Sicherung Ihres Stammbaums zu erstellen, wählen Sie Ja.",howto4:"Wählen Sie, wie viele Generationen zurück Sie möchten (8–20 ist gut). Klicken Sie auf Import und warten Sie — bei einer großen Familie kann dies bis zu einer Stunde dauern. Wenn es eingefroren wirkt oder \"FamilySearch is Busy... retrying\" anzeigt, ist das völlig normal. Schließen Sie das Programm nicht.",howto5:"Wenn es fertig ist, klicken Sie oben auf \"File\" (Datei), dann auf \"Export\" (Exportieren). Wählen Sie GEDCOM als Dateityp, und speichern Sie sie an einem leicht auffindbaren Ort, wie Ihrem Schreibtisch (Desktop) — nennen Sie sie zum Beispiel family-tree.ged.",howto6:"Kommen Sie hierher zurück und laden Sie diese Datei oben im Tab \"GEDCOM Hochladen\" hoch.",howtoAlt:"FamilySearch selbst bestätigt, dass es keine direkte Download-Schaltfläche für Ihren Familienstammbaum anbietet — Sie benötigen immer ein Hilfsprogramm wie dieses. Ancestral Quest ist einer der offiziellen zertifizierten Partner von FamilySearch, also eine sichere, gut getestete Wahl. RootsMagic und Legacy Family Tree sind zwei weitere bekannte zertifizierte Optionen, falls Sie diese lieber ausprobieren möchten.",signinTitle:"Mit FamilySearch anmelden",signinBody:"Das ist das Ziel: Klicken Sie auf eine Schaltfläche, melden Sie sich mit Ihrem Kirchenkonto an, und erhalten Sie Ihren Bericht — keine Datei, keine Software.",signinNote:"Dies erfordert einen offiziellen FamilySearch-API-Schlüssel, der derzeit geprüft wird. Nach der Genehmigung wird dieser Tab automatisch aktiviert — alles andere auf dieser Seite ist bereits fertig.",signinBtn:"Mit FamilySearch anmelden (API-Genehmigung ausstehend)",reportTitle:"📋 Familienstammbaum-Prüfbericht",statPeople:"Gefundene Personen",statErrors:"Fehler",statWarnings:"Warnungen",statClean:"Sauber",copyBtn:"Bericht Kopieren",startOverBtn:"Neu Beginnen",footer:"Erstellt für die Rush Creek Gemeinde — kostenlos für jedes Kirchenmitglied. Es werden keine Daten gespeichert; alles läuft in Ihrem Browser.",sourceNote:"Funktioniert automatisch von Ihrem Computer, USB-Stick, Telefon oder jedem cloud-synchronisierten Ordner (Google Drive, iCloud, Dropbox) — ohne zusätzliche Schritte.",showAll:"Alle {n} Ergebnisse anzeigen",ord:{baptism:"Taufe",confirmation:"Konfirmation",endowment:"Endowment"}},
+find:{noIndividuals:"Es wurden keine Personen (INDI-Datensätze) gefunden. Wenn Sie einfachen Text statt einer GEDCOM-Datei eingefügt haben, hat der Prüfer sein Bestes getan — für volle Genauigkeit laden Sie eine echte .ged-Datei hoch.",missingBirth:n=>`${n}: fehlendes Geburtsdatum.`,missingDeath:n=>`${n}: fehlendes Sterbedatum (könnte noch leben, aber prüfenswert).`,deathBeforeBirth:(n,d,b)=>`${n}: Sterbejahr (${d}) liegt vor dem Geburtsjahr (${b}) — unmögliches Datum.`,longLife:(n,y)=>`${n}: lebte ${y} Jahre — ungewöhnlich lang, prüfenswert.`,missingOrdinances:(n,l)=>`${n}: fehlende Ordinanz(en) — ${l}.`,incompleteNameRecord:id=>`Datensatz ${id}: Name fehlt oder ist unvollständig.`,incompleteNameLooks:n=>`${n}: Name sieht unvollständig aus (nur Initialen oder fehlender Nachname).`,duplicate:(n,b,i1,i2)=>`Mögliches Duplikat: zwei Datensätze für "${n}" (geboren ${b}) — ${i1} und ${i2}.`,childBeforeParent:(c,cb,p,pb)=>`${c}: geboren ${cb}, im selben Jahr oder vor dem Elternteil ${p} (geboren ${pb}) — unmöglich.`,childTooClose:(c,g,p)=>`${c}: nur ${g} Jahre nach dem Elternteil ${p} geboren — bitte prüfen.`,marriageBeforeBirth:(s,m,b)=>`${s}: Heiratsjahr (${m}) liegt vor der eigenen Geburt (${b}) — unmöglich.`,excluded:(c,mg)=>`${c} weitere Person(en) liegen außerhalb des gewählten ${mg}-Generationen-Bereichs und wurden nicht gescannt. Erhöhen Sie den Regler, um sie einzubeziehen.`,clean:"Keine Probleme gefunden — dieser Stammbaum sieht sauber aus!"}},
+tl:{ui:{title:"Pagsusuri ng Family Tree ng Rush Creek Ward",subtitle:"Libreng pagsusuri ng mga error sa family tree para sa sinumang miyembro ng Simbahan — pinapagana ng Claude",langLabel:"Wika:",tab1:"1. Mag-upload ng GEDCOM",tab2:"2. I-paste ang Impormasyon ng Pamilya",tab3:"3. Paano Kumuha ng GEDCOM",tab4:"4. Mag-sign in gamit ang FamilySearch",comingSoon:"malapit na",scanOptionsTitle:"Mga Opsyon sa Pag-scan",genLabel:"Mga henerasyong babalikan:",genMin:"1 (ako lang)",genMax:"20 (hanggang kaya)",checkDates:"Imposible / kulang na petsa",checkOrdinances:"Kulang na mga ordenansa ng LDS",checkDuplicates:"Duplikadong mga tao",checkNames:"Hindi kumpletong pangalan",checkMarriages:"Mga error sa kasal / pamilya",uploadTitle:"I-upload ang iyong GEDCOM file",dropzoneMain:"I-drag at i-drop ang iyong .ged file dito",dropzoneSub:"o mag-click upang pumili ng file",noFileYet:"Wala ka pang GEDCOM file? Walang problema —",sampleLink:"i-click dito para mag-load ng sample na family tree",sampleLinkEnd:"at makita kung ano talaga ang hitsura ng report.",analyzeBtn:"Suriin ang Aking Family Tree",pasteTitle:"I-paste ang impormasyon ng iyong pamilya",pasteSub:'I-paste ang raw GEDCOM text, o mag-type lang ng mga pangalan/petsa sa simpleng wika (hal. "Juan Cruz, ipinanganak 1902, namatay 1965, ikinasal kay Maria Santos noong 1925").',pastePlaceholder:"I-paste ang impormasyon ng family tree dito...",howtoTitle:"Paano kumuha ng GEDCOM file mula sa FamilySearch",howtoIntro:"Hindi mo kailangang maging eksperto sa computer para dito. Sundan lang ang bawat hakbang sa ibaba, ayon sa pagkakasunod-sunod. Aabutin ito ng humigit-kumulang 15–20 minuto, plus konting paghihintay habang nagda-download ang iyong family tree.",howto1:"Pumunta sa ancquest.com at i-download ang \"Ancestral Quest Basics.\" Libre ito, at gumagana sa Windows at Mac.",howto2:"Buksan ang Ancestral Quest. Sa unang screen mismo (o sa \"FamilySearch\" menu sa itaas), piliin ang \"Import from FamilySearch.\"",howto3:"I-type ang iyong FamilySearch username at password kapag hiniling. Kung mag-aalok itong i-back up muna ang iyong family tree, piliin ang Oo.",howto4:"Piliin kung ilang henerasyon pabalik ang gusto mo (maganda ang 8–20). I-click ang Import, pagkatapos maghintay — para sa malaking pamilya, maaari itong umabot ng isang oras. Kung mukhang na-freeze o nagsasabing \"FamilySearch is Busy... retrying,\" normal lang iyon. Huwag isara ang program.",howto5:"Kapag tapos na, i-click ang \"File\" sa itaas, pagkatapos ang \"Export.\" Piliin ang GEDCOM bilang uri ng file, at i-save ito sa lugar na madaling mahanap, tulad ng iyong Desktop — pangalanan itong parang family-tree.ged.",howto6:"Bumalik dito at i-upload ang file na iyon sa tab na \"Mag-upload ng GEDCOM\" sa itaas.",howtoAlt:"Kinukumpirma mismo ng FamilySearch na wala silang direktang download button para sa iyong Family Tree — palaging kailangan ng katulong na program tulad nito. Ang Ancestral Quest ay isa sa mga opisyal na sertipikadong partner ng FamilySearch, kaya ligtas at sinubukan na itong pagpipilian. Ang RootsMagic at Legacy Family Tree ay dalawa pang kilalang sertipikadong opsyon kung gusto mong subukan ang mga iyon.",signinTitle:"Mag-sign in gamit ang FamilySearch",signinBody:"Ito ang layunin: mag-click ng isang button, mag-log in gamit ang iyong Church account, at makuha ang iyong report — walang file, walang software.",signinNote:"Kailangan nito ng opisyal na FamilySearch API key, na kasalukuyang nirerepaso. Kapag naaprubahan, awtomatikong maa-activate ang tab na ito — tapos na ang lahat ng iba pa sa site na ito.",signinBtn:"Mag-sign in gamit ang FamilySearch (naghihintay ng aprubasyon ng API)",reportTitle:"📋 Ulat ng Pagsusuri ng Family Tree",statPeople:"Mga Taong Nahanap",statErrors:"Mga Error",statWarnings:"Mga Babala",statClean:"Malinis",copyBtn:"Kopyahin ang Ulat",startOverBtn:"Magsimula Muli",footer:"Ginawa para sa Rush Creek Ward — libre para sa sinumang miyembro ng Simbahan. Walang data na naka-imbak; lahat ay tumatakbo sa iyong browser.",sourceNote:"Awtomatikong gumagana mula sa iyong computer, USB drive, telepono, o anumang cloud-synced folder (Google Drive, iCloud, Dropbox) — walang extra na hakbang.",showAll:"Ipakita ang lahat ng {n} natuklasan",ord:{baptism:"binyag",confirmation:"kumpirmasyon",endowment:"endowment"}},
+find:{noIndividuals:"Walang nahanap na tao (INDI records). Kung nag-paste ka ng plain text sa halip na GEDCOM file, ginawa ng checker ang lahat ng makakaya — para sa buong katumpakan, mag-upload ng tunay na .ged file.",missingBirth:n=>`${n}: kulang ang petsa ng kapanganakan.`,missingDeath:n=>`${n}: kulang ang petsa ng kamatayan (maaaring buhay pa, pero sulit i-confirm).`,deathBeforeBirth:(n,d,b)=>`${n}: ang taon ng kamatayan (${d}) ay nauna sa taon ng kapanganakan (${b}) — imposibleng petsa.`,longLife:(n,y)=>`${n}: nabuhay ng ${y} taon — hindi karaniwang mahaba, sulit tingnan.`,missingOrdinances:(n,l)=>`${n}: kulang na rekord ng ordenansa — ${l}.`,incompleteNameRecord:id=>`Record ${id}: kulang o hindi kumpleto ang pangalan.`,incompleteNameLooks:n=>`${n}: mukhang hindi kumpleto ang pangalan (initials lang o kulang ang apelyido).`,duplicate:(n,b,i1,i2)=>`Posibleng duplicate: dalawang record para kay "${n}" (ipinanganak ${b}) — ${i1} at ${i2}.`,childBeforeParent:(c,cb,p,pb)=>`${c}: ipinanganak noong ${cb}, parehong taon o mas maaga sa magulang na si ${p} (ipinanganak ${pb}) — imposible.`,childTooClose:(c,g,p)=>`${c}: ${g} taon lang ang agwat mula nang ipanganak ang magulang na si ${p} — pakisuri.`,marriageBeforeBirth:(s,m,b)=>`${s}: ang taon ng kasal (${m}) ay nauna sa kanyang sariling kapanganakan (${b}) — imposible.`,excluded:(c,mg)=>`May ${c} karagdagang tao na labas sa napiling ${mg}-henerasyon na saklaw at hindi na-scan. Dagdagan ang slider para isama sila.`,clean:"Walang natagpuang problema — malinis ang family tree na ito!"}},
+sm:{ui:{title:"Su'esu'ega o le Laau Aiga a le Uarota o Rush Creek",subtitle:"Su'esu'ega fua o mea sese i le laau aiga mo so'o se tagata o le Ekalesia — fa'agaoioia e Claude",langLabel:"Gagana:",tab1:"1. Uta GEDCOM",tab2:"2. Fa'apipi'i Fa'amatalaga o le Aiga",tab3:"3. Auala e Maua ai se GEDCOM",tab4:"4. Ulufale i FamilySearch",comingSoon:"o le a vave ona maua",scanOptionsTitle:"Filifiliga o le Su'esu'ega",genLabel:"Augatupulaga e su'e i tua:",genMin:"1 (a'u lava)",genMax:"20 (e o'o atu i le mea e mafai)",checkDates:"Aso e le mafai / misi",checkOrdinances:"Fa'amaoniga LDS o lo'o misi",checkDuplicates:"Tagata faifaipea",checkNames:"Igoa le atoatoa",checkMarriages:"Mea sese i faaipoipoga / aiga",uploadTitle:"Uta lau faila GEDCOM",dropzoneMain:"Toso ma tu'u lau faila .ged iinei",dropzoneSub:"po'o kiliki e filifili ai se faila",noFileYet:"E le'i i ai sau faila GEDCOM? E leai se fa'afitauli —",sampleLink:"kiliki iinei e uta ai se laau fa'ata'ita'iga",sampleLinkEnd:"ma va'ai po'o le a le foliga o le lipoti.",analyzeBtn:"Su'esu'e la'u Laau Aiga",pasteTitle:"Fa'apipi'i fa'amatalaga o lou aiga",pasteSub:'Fa\'apipi\'i le tusitusiga GEDCOM, po\'o le tusi lava o igoa/aso i se gagana faigofie (fa\'ata\'ita\'iga, "Ioane Ioane, fanau 1902, maliu 1965, faaipoipo ia Mele Mele i le 1925").',pastePlaceholder:"Fa'apipi'i fa'amatalaga o le laau aiga iinei...",howtoTitle:"Auala e maua ai se faila GEDCOM mai FamilySearch",howtoIntro:"E te le mana'omia ona avea ma se tagata poto i komepiuta mo lenei mea. Na'o le mulimuli i laasaga taitasi i lalo, e tusa ma le fa'asologa. E tusa ma le 15–20 minute, fa'atasi ai ma sina taimi fa'atali a'o download lau laau aiga.",howto1:"Alu i le ancquest.com ma download le \"Ancestral Quest Basics.\" E fua, ma e galue i luga o Windows ma Mac.",howto2:"Tatala le Ancestral Quest. I le fa'asalalauga muamua lava (po'o le lisi \"FamilySearch\" i luga), filifili le \"Import from FamilySearch.\"",howto3:"Tusi lau igoa fa'aoga ma le upu fa'ailoa a le FamilySearch pe a fesiligia. Afai e ofoina mai le fa'asao muamua o lau laau aiga, filifili le Ioe.",howto4:"Filifili le a fia augatupulaga e te mana'o e su'e i tua (lelei le 8–20). Kiliki le Import, ona fa'atali lea — mo se aiga tele e ono alu i le tasi itula. Afai e foliga mai o lo'o taofia po'o o lo'o fa'ailoa mai \"FamilySearch is Busy... retrying,\" e masani lava lena. Aua ne'i tapunia le polokalama.",howto5:"A uma, kiliki le \"File\" i luga, ona kiliki lea o le \"Export.\" Filifili le GEDCOM e fai ma ituaiga faila, ona fa'asao lea i se mea e faigofie ona maua, e pei o lau Desktop — fa'aigoa e pei o le family-tree.ged.",howto6:"Toe fo'i mai iinei ma uta lea faila i le tab \"Uta GEDCOM\" i luga.",howtoAlt:"Ua fa'amaonia lava e le FamilySearch e leai se pau download tuusa'o mo lau Laau Aiga — e mana'omia pea se polokalama fesoasoani e pei o lenei. O le Ancestral Quest o se tasi o paaga fa'amaonia aloa'ia a le FamilySearch, o lea o se filifiliga saogalemu ma ua uma ona su'esu'eina lelei. O le RootsMagic ma le Legacy Family Tree o ni isi filifiliga fa'amaonia lauiloa e lua pe a e mana'o e fa'ata'ita'i i ai.",signinTitle:"Ulufale i FamilySearch",signinBody:"O le sini lea: kiliki se pau, ulufale i lau tala i le Ekalesia, ma maua lau lipoti — e aunoa ma se faila, e aunoa ma se polokalama.",signinNote:"E mana'omia ai se ki fa'aoga aloa'ia a le FamilySearch API, lea o lo'o su'esu'eina nei. A fa'amaonia, o le a fa'agaoioia otometi lenei tab — o isi mea uma i lenei saite ua uma ona fausia.",signinBtn:"Ulufale i FamilySearch (o lo'o fa'atalitali le fa'amaoniga o le API)",reportTitle:"📋 Lipoti o le Su'esu'ega o le Laau Aiga",statPeople:"Tagata na Maua",statErrors:"Mea Sese",statWarnings:"Fa'aeteete",statClean:"Mama",copyBtn:"Kopi le Lipoti",startOverBtn:"Toe Amata",footer:"Fausia mo le Uarota o Rush Creek — fua mo so'o se tagata o le Ekalesia. E leai se fa'amaumauga o lo'o teuina; e fa'agaoioia uma i lau polokalama su'esu'e.",sourceNote:"E galue otometi mai lau komepiuta, USB drive, telefoni, po'o so'o se folder ua fa'aogaina i le ao (Google Drive, iCloud, Dropbox) — e aunoa ma ni isi laasaga.",showAll:"Fa'aali uma {n} mea na maua",ord:{baptism:"papatisoga",confirmation:"fa'amaoniga",endowment:"fa'aeega"}},
+find:{noIndividuals:"E leai ni tagata (fa'amaumauga INDI) na maua. Afai na e fa'apipi'i tusitusiga faigofie na'o le GEDCOM faila, na faia e le su'esu'ega le mea sili na mafai — mo le sa'o atoatoa, uta se faila .ged moni.",missingBirth:n=>`${n}: misi le aso fanau.`,missingDeath:n=>`${n}: misi le aso maliu (atonu o lo'o ola pea, ae tatau ona fa'amaonia).`,deathBeforeBirth:(n,d,b)=>`${n}: o le tausaga o le maliu (${d}) e mua'i i le tausaga o le fanau (${b}) — aso le mafai.`,longLife:(n,y)=>`${n}: ola mo le ${y} tausaga — e le masani ona umi, tatau ona toe siaki.`,missingOrdinances:(n,l)=>`${n}: misi fa'amaoniga — ${l}.`,incompleteNameRecord:id=>`Fa'amaumauga ${id}: misi po'o le le atoatoa o le igoa.`,incompleteNameLooks:n=>`${n}: e foliga le atoatoa le igoa (na'o mataitusi po'o le misi le fa'aigoa).`,duplicate:(n,b,i1,i2)=>`Atonu e faifaipea: e lua fa'amaumauga mo "${n}" (fanau ${b}) — ${i1} ma ${i2}.`,childBeforeParent:(c,cb,p,pb)=>`${c}: fanau i le ${cb}, tutusa po'o mua'i i le matua o ${p} (fanau ${pb}) — le mafai.`,childTooClose:(c,g,p)=>`${c}: na'o le ${g} tausaga talu ona fanau le matua o ${p} — fa'amolemole siaki.`,marriageBeforeBirth:(s,m,b)=>`${s}: o le tausaga o le fa'aipoipoga (${m}) e mua'i i lona lava fanau (${b}) — le mafai.`,excluded:(c,mg)=>`E ${c} tagata fa'aopoopo o lo'o i fafo atu o le ${mg}-augatupulaga na filifilia ma e le'i su'esu'eina. Fa'ateleina le slider e aofia ai i latou.`,clean:"E leai ni fa'afitauli na maua — e mama lenei laau aiga!"}},
+ja:{ui:{title:"ラッシュクリークワード家族歴史レビュー",subtitle:"教会員なら誰でも無料で使える家系図エラーチェック — Claude搭載",langLabel:"言語:",tab1:"1. GEDCOMをアップロード",tab2:"2. 家族情報を貼り付け",tab3:"3. GEDCOMの入手方法",tab4:"4. FamilySearchでサインイン",comingSoon:"近日公開",scanOptionsTitle:"スキャン設定",genLabel:"さかのぼる世代数:",genMin:"1（自分のみ）",genMax:"20（さかのぼれる限り）",checkDates:"不可能・欠落した日付",checkOrdinances:"欠落したLDS儀式",checkDuplicates:"重複した個人",checkNames:"不完全な名前",checkMarriages:"結婚・家族のエラー",uploadTitle:"GEDCOMファイルをアップロード",dropzoneMain:".gedファイルをここにドラッグ＆ドロップ",dropzoneSub:"またはクリックしてファイルを選択",noFileYet:"まだGEDCOMファイルをお持ちでないですか？大丈夫です —",sampleLink:"ここをクリックしてサンプルの家系図を読み込む",sampleLinkEnd:"レポートがどのように見えるか確認できます。",analyzeBtn:"家系図を分析する",pasteTitle:"家族情報を貼り付け",pasteSub:'生のGEDCOMテキストを貼り付けるか、単純な言葉で名前や日付を入力してください（例：「山田太郎、1902年生まれ、1965年没、1925年に山田花子と結婚」）。',pastePlaceholder:"ここに家系図情報を貼り付けてください...",howtoTitle:"FamilySearchからGEDCOMファイルを入手する方法",howtoIntro:"これを行うのにコンピューターの専門家である必要はありません。以下の各手順を順番に従うだけです。所要時間は約15〜20分、家系図のダウンロード待ち時間が別途かかります。",howto1:"ancquest.com にアクセスして「Ancestral Quest Basics」をダウンロードしてください。無料で、WindowsとMacの両方で使えます。",howto2:"Ancestral Questを開きます。最初の画面(または上部の「FamilySearch」メニュー)で「Import from FamilySearch」を選択してください。",howto3:"求められたらFamilySearchのユーザー名とパスワードを入力してください。先に家系図のバックアップを提案された場合は「はい」を選んでください。",howto4:"さかのぼりたい世代数を選びます(8〜20世代がおすすめです)。「Import」をクリックして待ちます — 大きな家系だと最大1時間かかることがあります。フリーズしたように見えたり「FamilySearch is Busy... retrying」と表示されても、それは正常です。プログラムを閉じないでください。",howto5:"完了したら、上部の「File」をクリックし、次に「Export」をクリックします。ファイル形式としてGEDCOMを選び、デスクトップなど見つけやすい場所に保存してください — family-tree.gedのような名前を付けます。",howto6:"ここに戻り、上の「GEDCOMをアップロード」タブでそのファイルをアップロードしてください。",howtoAlt:"FamilySearch自身が、家系図を直接ダウンロードするボタンは提供していないと認めています — このような補助プログラムが常に必要です。Ancestral QuestはFamilySearchの公式認定パートナーの一つなので、安全でよくテストされた選択肢です。RootsMagicやLegacy Family Treeも、他に試してみたい場合の有名な認定オプションです。",signinTitle:"FamilySearchでサインイン",signinBody:"これが目標です：ボタンをクリックし、教会アカウントでログインするだけでレポートが得られます — ファイルもソフトウェアも不要です。",signinNote:"これには公式のFamilySearch APIキーが必要で、現在審査中です。承認され次第、このタブは自動的に有効になります — サイトの他の部分はすでに完成しています。",signinBtn:"FamilySearchでサインイン（API承認待ち）",reportTitle:"📋 家系図レビューレポート",statPeople:"見つかった人数",statErrors:"エラー",statWarnings:"警告",statClean:"問題なし",copyBtn:"レポートをコピー",startOverBtn:"最初からやり直す",footer:"ラッシュクリークワードのために作成 — 教会員なら誰でも無料。データは保存されません。すべてブラウザ内で実行されます。",sourceNote:"パソコン、USBドライブ、スマートフォン、またはクラウド同期フォルダ（Google Drive、iCloud、Dropbox）から自動的に動作します — 追加の手順は不要です。",showAll:"{n}件すべての結果を表示",ord:{baptism:"バプテスマ",confirmation:"確認式",endowment:"エンダウメント"}},
+find:{noIndividuals:"個人（INDIレコード）が見つかりませんでした。GEDCOMファイルの代わりに単純なテキストを貼り付けた場合、チェッカーは最善を尽くしました — 正確性を高めるには、実際の.gedファイルをアップロードしてください。",missingBirth:n=>`${n}：生年月日が欠落しています。`,missingDeath:n=>`${n}：没年月日が欠落しています（存命の可能性がありますが、確認する価値があります）。`,deathBeforeBirth:(n,d,b)=>`${n}：没年（${d}）が生年（${b}）より前です — あり得ない日付です。`,longLife:(n,y)=>`${n}：${y}年生きました — 異常に長いので確認する価値があります。`,missingOrdinances:(n,l)=>`${n}：儀式の記録が欠落しています — ${l}。`,incompleteNameRecord:id=>`記録${id}：名前が欠落しているか不完全です。`,incompleteNameLooks:n=>`${n}：名前が不完全に見えます（イニシャルのみ、または姓が欠落）。`,duplicate:(n,b,i1,i2)=>`重複の可能性："${n}"（${b}年生まれ）に2つの記録があります — ${i1}と${i2}。`,childBeforeParent:(c,cb,p,pb)=>`${c}：${cb}年生まれで、親の${p}（${pb}年生まれ）と同年またはそれ以前です — あり得ません。`,childTooClose:(c,g,p)=>`${c}：親の${p}からわずか${g}年後に生まれています — 確認してください。`,marriageBeforeBirth:(s,m,b)=>`${s}：結婚年（${m}）が本人の生年（${b}）より前です — あり得ません。`,excluded:(c,mg)=>`選択された${mg}世代の範囲外に${c}人の個人がおり、スキャンされませんでした。スライダーを増やして含めてください。`,clean:"問題は見つかりませんでした — この家系図はきれいです！"}}
+};
+
+let currentLang = 'en';
+let lastResult = null; // {people, findings} from most recent analysis, for re-render on language switch
+
+function applyUILanguage(lang){
+  const t = LANG[lang].ui;
+  document.getElementById('t_title').textContent = t.title;
+  document.getElementById('t_subtitle').textContent = t.subtitle;
+  document.getElementById('t_langLabel').textContent = t.langLabel;
+  document.getElementById('t_tab1').textContent = t.tab1;
+  document.getElementById('t_tab2').textContent = t.tab2;
+  document.getElementById('t_tab3').textContent = t.tab3;
+  document.getElementById('t_tab4').textContent = t.tab4;
+  document.getElementById('t_comingSoon').textContent = t.comingSoon;
+  document.getElementById('t_scanOptionsTitle').textContent = t.scanOptionsTitle;
+  document.getElementById('t_genLabel').textContent = t.genLabel;
+  document.getElementById('t_genMin').textContent = t.genMin;
+  document.getElementById('t_genMax').textContent = t.genMax;
+  document.getElementById('t_checkDates').textContent = t.checkDates;
+  document.getElementById('t_checkOrdinances').textContent = t.checkOrdinances;
+  document.getElementById('t_checkDuplicates').textContent = t.checkDuplicates;
+  document.getElementById('t_checkNames').textContent = t.checkNames;
+  document.getElementById('t_checkMarriages').textContent = t.checkMarriages;
+  document.getElementById('t_uploadTitle').textContent = t.uploadTitle;
+  document.getElementById('t_dropzoneMain').textContent = t.dropzoneMain;
+  document.getElementById('t_dropzoneSub').textContent = t.dropzoneSub;
+  document.getElementById('t_sourceNote').textContent = t.sourceNote;
+  document.getElementById('t_noFileYet').textContent = t.noFileYet;
+  document.getElementById('t_sampleLink').textContent = t.sampleLink;
+  document.getElementById('t_sampleLinkEnd').textContent = t.sampleLinkEnd;
+  document.getElementById('t_analyzeBtn1').textContent = t.analyzeBtn;
+  document.getElementById('t_analyzeBtn2').textContent = t.analyzeBtn;
+  document.getElementById('t_pasteTitle').textContent = t.pasteTitle;
+  document.getElementById('t_pasteSub').textContent = t.pasteSub;
+  document.getElementById('pasteArea').placeholder = t.pastePlaceholder;
+  document.getElementById('t_howtoTitle').textContent = t.howtoTitle;
+  document.getElementById('t_howtoIntro').textContent = t.howtoIntro;
+  document.getElementById('t_howto1').textContent = t.howto1;
+  document.getElementById('t_howto2').textContent = t.howto2;
+  document.getElementById('t_howto3').textContent = t.howto3;
+  document.getElementById('t_howto4').textContent = t.howto4;
+  document.getElementById('t_howto5').textContent = t.howto5;
+  document.getElementById('t_howto6').textContent = t.howto6;
+  document.getElementById('t_howtoAlt').textContent = t.howtoAlt;
+  document.getElementById('t_signinTitle').textContent = t.signinTitle;
+  document.getElementById('t_signinBody').textContent = t.signinBody;
+  document.getElementById('t_signinNote').textContent = t.signinNote;
+  document.getElementById('t_signinBtn').textContent = t.signinBtn;
+  document.getElementById('t_reportTitle').textContent = t.reportTitle;
+  document.getElementById('t_copyBtn').textContent = t.copyBtn;
+  document.getElementById('t_startOverBtn').textContent = t.startOverBtn;
+  document.getElementById('t_footer').textContent = t.footer;
+  document.documentElement.lang = lang;
+}
+
+document.getElementById('langSelect').addEventListener('change', (e)=>{
+  currentLang = e.target.value;
+  applyUILanguage(currentLang);
+  if(lastResult){ renderReport(lastResult); }
+});
+
+// ---------- Tab switching ----------
+document.querySelectorAll('.step-pill').forEach(pill=>{
+  pill.addEventListener('click',()=>{
+    if(pill.dataset.tab==='signin'){
+      document.querySelectorAll('.step-pill').forEach(p=>p.classList.remove('active'));
+      pill.classList.add('active');
+      document.querySelectorAll('.tab-panel').forEach(p=>p.classList.add('hidden'));
+      document.getElementById('tab-signin').classList.remove('hidden');
+      document.getElementById('reportCard').classList.add('hidden');
+      return;
+    }
+    document.querySelectorAll('.step-pill').forEach(p=>p.classList.remove('active'));
+    pill.classList.add('active');
+    document.querySelectorAll('.tab-panel').forEach(p=>p.classList.add('hidden'));
+    document.getElementById('tab-'+pill.dataset.tab).classList.remove('hidden');
+    document.getElementById('reportCard').classList.add('hidden');
+  });
+});
+
+// ---------- Sample GEDCOM (intentionally contains errors) ----------
+const SAMPLE_GEDCOM = `0 HEAD
+1 SOUR RushCreekDemo
+0 @I1@ INDI
+1 NAME John /Smith/
+1 SEX M
+1 BIRT
+2 DATE 12 MAR 1901
+1 DEAT
+2 DATE 4 JUL 1968
+1 BAPL
+2 DATE 1920
+0 @I2@ INDI
+1 NAME Mary /Jones/
+1 SEX F
+1 BIRT
+2 DATE 3 JAN 1905
+1 DEAT
+2 DATE 9 SEP 1971
+0 @I3@ INDI
+1 NAME James /Smith/
+1 SEX M
+1 BIRT
+2 DATE 15 JUN 1898
+1 DEAT
+2 DATE 2 FEB 1955
+0 @I4@ INDI
+1 NAME R. /Smith/
+1 SEX M
+1 BIRT
+2 DATE 20 APR 1922
+0 @I5@ INDI
+1 NAME Sarah /Smith/
+1 SEX F
+0 @I6@ INDI
+1 NAME John /Smith/
+1 SEX M
+1 BIRT
+2 DATE 12 MAR 1901
+1 DEAT
+2 DATE 4 JUL 1968
+0 @F1@ FAM
+1 HUSB @I1@
+1 WIFE @I2@
+1 CHIL @I4@
+1 MARR
+2 DATE 6 JUN 1925
+0 @F2@ FAM
+1 HUSB @I3@
+1 CHIL @I1@
+1 MARR
+2 DATE 10 MAY 1899
+0 TRLR`;
+
+document.getElementById('loadSample').addEventListener('click',()=>{
+  document.querySelectorAll('.step-pill').forEach(p=>p.classList.remove('active'));
+  document.querySelector('[data-tab="paste"]').classList.add('active');
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.add('hidden'));
+  document.getElementById('tab-paste').classList.remove('hidden');
+  document.getElementById('pasteArea').value = SAMPLE_GEDCOM;
+});
+
+// ---------- GEDCOM parsing ----------
+function parseGedcom(text){
+  const lines = text.split(/\r?\n/).map(l=>l.trim()).filter(Boolean);
+  const indis = {};
+  const fams = {};
+  let current=null, currentType=null, lastTag=null;
+
+  lines.forEach(line=>{
+    const m = line.match(/^(\d+)\s+(@\w+@)?\s*(\w+)\s*(.*)$/);
+    if(!m) return;
+    const [,level,ptr,tag,rest] = m;
+    const lvl = parseInt(level,10);
+
+    if(lvl===0 && ptr && tag==='INDI'){
+      current = {id:ptr, name:'', sex:'', birt:null, deat:null, ordinances:{}, famc:[], fams:[]};
+      indis[ptr]=current; currentType='INDI'; lastTag=null; return;
+    }
+    if(lvl===0 && ptr && tag==='FAM'){
+      current = {id:ptr, husb:null, wife:null, chil:[], marr:null};
+      fams[ptr]=current; currentType='FAM'; lastTag=null; return;
+    }
+    if(lvl===0){ current=null; currentType=null; return; }
+    if(!current) return;
+
+    if(currentType==='INDI'){
+      if(lvl===1 && tag==='NAME'){ current.name = rest.replace(/\//g,'').trim(); lastTag=null; }
+      else if(lvl===1 && tag==='SEX'){ current.sex = rest.trim(); }
+      else if(lvl===1 && tag==='FAMC'){ current.famc.push(rest.trim()); }
+      else if(lvl===1 && tag==='FAMS'){ current.fams.push(rest.trim()); }
+      else if(lvl===1 && tag==='BIRT'){ lastTag='BIRT'; }
+      else if(lvl===1 && tag==='DEAT'){ lastTag='DEAT'; }
+      else if(lvl===1 && ['BAPL','CONL','ENDL','SLGC'].includes(tag)){ current.ordinances[tag]=true; lastTag=tag; }
+      else if(lvl===2 && tag==='DATE'){
+        const year = (rest.match(/\d{4}/)||[])[0];
+        if(lastTag==='BIRT') current.birt = year?parseInt(year,10):null;
+        if(lastTag==='DEAT') current.deat = year?parseInt(year,10):null;
+      }
+    } else if(currentType==='FAM'){
+      if(lvl===1 && tag==='HUSB'){ current.husb = rest.trim(); }
+      else if(lvl===1 && tag==='WIFE'){ current.wife = rest.trim(); }
+      else if(lvl===1 && tag==='CHIL'){ current.chil.push(rest.trim()); }
+      else if(lvl===1 && tag==='MARR'){ lastTag='MARR'; }
+      else if(lvl===2 && tag==='DATE' && lastTag==='MARR'){
+        const year=(rest.match(/\d{4}/)||[])[0];
+        current.marr = year?parseInt(year,10):null;
+      }
+    }
+  });
+  return {indis, fams};
+}
+
+function computeGenerations(indis, fams){
+  // Generation 0 = the "home person" (the first individual in the file — the person
+  // the tree was built around). Walking UP a FAMC link adds one generation.
+  // Spouses sit at the same generation; children sit one generation closer to home.
+  const ids = Object.keys(indis);
+  if(!ids.length) return {};
+  const home = ids[0];
+  const gen = {};
+  gen[home] = 0;
+
+  // Pass 1 — climb to ancestors via child->parents (FAMC) links.
+  let frontier = [home], depth = 0;
+  while(frontier.length && depth < 40){
+    const next = [];
+    frontier.forEach(id=>{
+      const person = indis[id];
+      if(!person) return;
+      (person.famc||[]).forEach(fid=>{
+        const fam = fams[fid];
+        if(!fam) return;
+        [fam.husb, fam.wife].filter(Boolean).forEach(pid=>{
+          if(indis[pid] && !(pid in gen)){ gen[pid] = gen[id] + 1; next.push(pid); }
+        });
+      });
+    });
+    frontier = next; depth++;
+  }
+
+  // Pass 2 — spread outward so spouses, siblings, aunts/uncles and cousins
+  // inherit a sensible generation too. Repeat until nothing new is assigned.
+  for(let pass=0; pass<40; pass++){
+    let changed = false;
+    Object.values(fams).forEach(f=>{
+      const parents = [f.husb, f.wife].filter(p=>p && indis[p]);
+      const knownParents = parents.filter(p=>p in gen).map(p=>gen[p]);
+      if(knownParents.length){
+        const g = Math.min(...knownParents);
+        parents.forEach(p=>{ if(!(p in gen)){ gen[p] = g; changed = true; } });
+        (f.chil||[]).forEach(cid=>{
+          if(indis[cid] && !(cid in gen)){ gen[cid] = Math.max(0, g-1); changed = true; }
+        });
+      } else {
+        const knownKids = (f.chil||[]).filter(cid=>indis[cid] && (cid in gen));
+        if(knownKids.length){
+          const g = Math.min(...knownKids.map(cid=>gen[cid])) + 1;
+          parents.forEach(p=>{ if(!(p in gen)){ gen[p] = g; changed = true; } });
+        }
+      }
+    });
+    if(!changed) break;
+  }
+  return gen;
+}
+
+// Findings are stored as {level, type, params} — language-agnostic.
+// localizeFinding() converts to display text using LANG[lang].find + ord names.
+const THIS_YEAR = new Date().getFullYear();
+
+function analyzeTree(text, opts){
+  opts = opts || {maxGen:20, checks:{dates:true,ordinances:true,duplicates:true,names:true,marriages:true}};
+  const {indis, fams} = parseGedcom(text);
+  const findings = [];
+  const allPeople = Object.values(indis);
+  const genMap = computeGenerations(indis, fams);
+
+  const withinRange = p => {
+    const g = genMap[p.id];
+    return g===undefined ? true : g <= (opts.maxGen-1);
+  };
+  const people = allPeople.filter(withinRange);
+  const excludedCount = allPeople.length - people.length;
+
+  if(people.length===0){
+    findings.push({level:'warn', type:'noIndividuals', params:[]});
+  }
+
+  if(opts.checks.dates){
+    people.forEach(p=>{
+      if(!p.birt) findings.push({level:'warn', type:'missingBirth', params:[p.name||'—']});
+      // Only flag a missing death date when the person is far too old to still be living —
+      // otherwise every living relative in the tree gets flagged for no reason.
+      if(!p.deat && p.birt && (THIS_YEAR - p.birt) > 110){
+        findings.push({level:'warn', type:'missingDeath', params:[p.name||'—']});
+      }
+    });
+    people.forEach(p=>{
+      if(p.birt && p.deat && p.deat < p.birt){
+        findings.push({level:'error', type:'deathBeforeBirth', params:[p.name,p.deat,p.birt]});
+      }
+      if(p.birt && p.deat && (p.deat - p.birt) > 115){
+        findings.push({level:'warn', type:'longLife', params:[p.name,p.deat-p.birt]});
+      }
+    });
+  }
+
+  if(opts.checks.ordinances){
+    people.forEach(p=>{
+      const missing = [];
+      if(!p.ordinances.BAPL) missing.push('baptism');
+      if(!p.ordinances.CONL) missing.push('confirmation');
+      if(!p.ordinances.ENDL) missing.push('endowment');
+      if(missing.length){
+        findings.push({level:'warn', type:'missingOrdinances', params:[p.name, missing]});
+      }
+    });
+  }
+
+  if(opts.checks.names){
+    people.forEach(p=>{
+      if(!p.name || p.name.trim().length<3){
+        findings.push({level:'error', type:'incompleteNameRecord', params:[p.id]});
+      } else if(/^[A-Z]\.?\s/.test(p.name) || !/\s/.test(p.name)){
+        findings.push({level:'warn', type:'incompleteNameLooks', params:[p.name]});
+      }
+    });
+  }
+
+  if(opts.checks.duplicates){
+    for(let i=0;i<people.length;i++){
+      for(let j=i+1;j<people.length;j++){
+        const a=people[i], b=people[j];
+        if(a.name && b.name && a.name===b.name && a.birt===b.birt){
+          findings.push({level:'error', type:'duplicate', params:[a.name, a.birt||'?', a.id, b.id]});
+        }
+      }
+    }
+  }
+
+  if(opts.checks.marriages){
+    Object.values(fams).forEach(f=>{
+      const husb = indis[f.husb], wife = indis[f.wife];
+      if(!withinRange({id:f.husb}) && !withinRange({id:f.wife})) return;
+      [husb,wife].filter(Boolean).forEach(parent=>{
+        f.chil.forEach(cid=>{
+          const child = indis[cid];
+          if(child && child.birt && parent.birt){
+            if(child.birt <= parent.birt){
+              findings.push({level:'error', type:'childBeforeParent', params:[child.name||cid, child.birt, parent.name, parent.birt]});
+            } else if(child.birt - parent.birt < 13){
+              findings.push({level:'warn', type:'childTooClose', params:[child.name||cid, child.birt-parent.birt, parent.name]});
+            }
+          }
+        });
+      });
+      [husb,wife].filter(Boolean).forEach(spouse=>{
+        if(f.marr && spouse.birt && f.marr < spouse.birt){
+          findings.push({level:'error', type:'marriageBeforeBirth', params:[spouse.name, f.marr, spouse.birt]});
+        }
+      });
+    });
+  }
+
+  if(excludedCount>0){
+    findings.push({level:'warn', type:'excluded', params:[excludedCount, opts.maxGen]});
+  }
+
+  if(findings.length===0){
+    findings.push({level:'ok', type:'clean', params:[]});
+  }
+
+  return {people, fams, findings};
+}
+
+function localizeFinding(f, lang){
+  const dict = LANG[lang].find;
+  const ord = LANG[lang].ui.ord;
+  if(f.type==='noIndividuals') return dict.noIndividuals;
+  if(f.type==='clean') return dict.clean;
+  if(f.type==='missingOrdinances'){
+    const list = f.params[1].map(k=>ord[k]).join(', ');
+    return dict.missingOrdinances(f.params[0], list);
+  }
+  if(f.type==='incompleteNameRecord') return dict.incompleteNameRecord(f.params[0]);
+  if(f.type==='incompleteNameLooks') return dict.incompleteNameLooks(f.params[0]);
+  if(dict[f.type]) return dict[f.type](...f.params);
+  return '';
+}
+
+function renderReport(result){
+  lastResult = result;
+  const t = LANG[currentLang].ui;
+  const { people, findings } = result;
+  const errorCount = findings.filter(f=>f.level==='error').length;
+  const warnCount = findings.filter(f=>f.level==='warn').length;
+  const okCount = findings.filter(f=>f.level==='ok').length;
+
+  document.getElementById('summaryGrid').innerHTML = `
+    <div class="stat"><div class="num">${people.length}</div><div class="lbl">${t.statPeople}</div></div>
+    <div class="stat"><div class="num">${errorCount}</div><div class="lbl">${t.statErrors}</div></div>
+    <div class="stat"><div class="num">${warnCount}</div><div class="lbl">${t.statWarnings}</div></div>
+    <div class="stat"><div class="num">${okCount}</div><div class="lbl">${t.statClean}</div></div>
+  `;
+
+  // Errors first, then warnings, then clean notes — a 900-item flat list is unreadable,
+  // so only the first 40 render until the reader asks for the rest.
+  const rank = {error:0, warn:1, ok:2};
+  const ordered = findings.slice().sort((a,b)=>(rank[a.level]??3)-(rank[b.level]??3));
+  const LIMIT = 40;
+  const list = document.getElementById('findingsList');
+
+  function paint(showAll){
+    const shown = showAll ? ordered : ordered.slice(0, LIMIT);
+    let html = shown.map(f=>
+      `<div class="finding ${f.level==='error'?'':f.level}">${localizeFinding(f, currentLang)}</div>`
+    ).join('');
+    if(!showAll && ordered.length > LIMIT){
+      html += `<button class="btn outline" id="showAllFindings" style="margin-top:4px;">${t.showAll.replace('{n}', ordered.length)}</button>`;
+    }
+    list.innerHTML = html;
+    const btn = document.getElementById('showAllFindings');
+    if(btn) btn.addEventListener('click', ()=>paint(true));
+  }
+  paint(false);
+
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.add('hidden'));
+  document.getElementById('reportCard').classList.remove('hidden');
+  document.getElementById('reportCard').scrollIntoView({behavior:'smooth'});
+}
+
+// ---------- Wiring ----------
+let uploadedText = null;
+
+const dropzone = document.getElementById('dropzone');
+const fileInput = document.getElementById('fileInput');
+dropzone.addEventListener('click', ()=>fileInput.click());
+dropzone.addEventListener('dragover', e=>{e.preventDefault(); dropzone.classList.add('drag');});
+dropzone.addEventListener('dragleave', ()=>dropzone.classList.remove('drag'));
+dropzone.addEventListener('drop', e=>{
+  e.preventDefault(); dropzone.classList.remove('drag');
+  const file = e.dataTransfer.files[0];
+  if(file) readFile(file);
+});
+fileInput.addEventListener('change', e=>{
+  const file = e.target.files[0];
+  if(file) readFile(file);
+});
+function readFile(file){
+  const reader = new FileReader();
+  reader.onload = ()=>{
+    uploadedText = reader.result;
+    dropzone.querySelector('strong').textContent = '✓ ' + file.name;
+  };
+  reader.readAsText(file);
+}
+
+const genSlider = document.getElementById('genSlider');
+const genValueLabel = document.getElementById('genValueLabel');
+genSlider.addEventListener('input', ()=>{ genValueLabel.textContent = genSlider.value; });
+
+function getScanOptions(){
+  const checks = {};
+  document.querySelectorAll('.opt-check').forEach(cb=>{ checks[cb.dataset.opt] = cb.checked; });
+  return {maxGen: parseInt(genSlider.value,10), checks};
+}
+
+document.getElementById('analyzeUpload').addEventListener('click', ()=>{
+  const text = uploadedText || SAMPLE_GEDCOM;
+  renderReport(analyzeTree(text, getScanOptions()));
+});
+document.getElementById('analyzePaste').addEventListener('click', ()=>{
+  const text = document.getElementById('pasteArea').value.trim() || SAMPLE_GEDCOM;
+  renderReport(analyzeTree(text, getScanOptions()));
+});
+document.getElementById('startOver').addEventListener('click', ()=>{
+  document.getElementById('reportCard').classList.add('hidden');
+  document.querySelectorAll('.step-pill').forEach(p=>p.classList.remove('active'));
+  document.querySelector('[data-tab="upload"]').classList.add('active');
+  document.getElementById('tab-upload').classList.remove('hidden');
+});
+document.getElementById('copyReport').addEventListener('click', ()=>{
+  const text = Array.from(document.querySelectorAll('#findingsList .finding')).map(f=>'- '+f.textContent).join('\n');
+  const summary = document.getElementById('summaryGrid').innerText.replace(/\n+/g,' | ');
+  navigator.clipboard.writeText('Rush Creek Ward Family Tree Review\n'+summary+'\n\n'+text).then(()=>{
+    const btn = document.getElementById('copyReport').querySelector('span');
+    const old = btn.textContent;
+    btn.textContent = 'Copied!';
+    setTimeout(()=>btn.textContent=old, 1500);
+  });
+});
+</script>
+</body>
+</html>
