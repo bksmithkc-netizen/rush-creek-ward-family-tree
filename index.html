@@ -288,6 +288,12 @@
   .howto-intro{font-size:13.5px;color:var(--gray);line-height:1.6;margin:0 0 16px;}
   ol.instructions li b{color:var(--navy);}
   ol.instructions li a{color:#1a5fb4;font-weight:600;}
+  a.fslink{text-decoration:none;cursor:pointer;}
+  a.fslink:hover{text-decoration:underline;}
+  .fsarrow{font-size:.72em;opacity:.5;margin-left:3px;vertical-align:super;}
+  a.fslink:hover .fsarrow{opacity:1;}
+  a.pcard-name{color:#fff;}
+  a.pcard-name:hover{color:var(--gold-light);}
   .callout{
     background:#fff9ec;border:1px solid #e0c98a;border-left:4px solid var(--gold);
     border-radius:10px;padding:14px 16px;margin-top:18px;
@@ -674,7 +680,7 @@ function parseGedcom(text){
     const lvl = parseInt(level,10);
 
     if(lvl===0 && ptr && tag==='INDI'){
-      current = {id:ptr, name:'', sex:'', birt:null, deat:null, ordinances:{}, ord:{}, famc:[], fams:[]};
+      current = {id:ptr, name:'', sex:'', birt:null, deat:null, ordinances:{}, ord:{}, famc:[], fams:[], fsid:null};
       indis[ptr]=current; currentType='INDI'; lastTag=null; return;
     }
     if(lvl===0 && ptr && tag==='FAM'){
@@ -693,6 +699,7 @@ function parseGedcom(text){
         else if(tag==='SEX'){ current.sex = rest.trim(); lastTag=null; }
         else if(tag==='FAMC'){ current.famc.push(rest.trim()); lastTag=null; }
         else if(tag==='FAMS'){ current.fams.push(rest.trim()); lastTag=null; }
+        else if(tag==='_FSFTID'){ current.fsid = rest.trim(); lastTag=null; }
         else if(tag==='BIRT'){ lastTag='BIRT'; }
         else if(tag==='DEAT'){ lastTag='DEAT'; }
         else if(ORD_TAGS.includes(tag)){
@@ -937,19 +944,19 @@ function analyzeTree(text, opts){
   if(opts.checks.dates){
     people.forEach(p=>{
       if(p.birt && p.birt > THIS_YEAR) p.birt = null;  // future birth year = bad data, not a real date
-      if(!p.birt) findings.push({level:'warn', type:'missingBirth', params:[p.name||'—']});
+      if(!p.birt) findings.push({level:'warn', type:'missingBirth', params:[p.name||'—'], pid:p.id});
       // Only flag a missing death date when the person is far too old to still be living —
       // otherwise every living relative in the tree gets flagged for no reason.
       if(!p.deat && p.birt && (THIS_YEAR - p.birt) > 110){
-        findings.push({level:'warn', type:'missingDeath', params:[p.name||'—']});
+        findings.push({level:'warn', type:'missingDeath', params:[p.name||'—'], pid:p.id});
       }
     });
     people.forEach(p=>{
       if(p.birt && p.deat && p.deat < p.birt){
-        findings.push({level:'error', type:'deathBeforeBirth', params:[p.name,p.deat,p.birt]});
+        findings.push({level:'error', type:'deathBeforeBirth', params:[p.name,p.deat,p.birt], pid:p.id});
       }
       if(p.birt && p.deat && (p.deat - p.birt) > 115){
-        findings.push({level:'warn', type:'longLife', params:[p.name,p.deat-p.birt]});
+        findings.push({level:'warn', type:'longLife', params:[p.name,p.deat-p.birt], pid:p.id});
       }
     });
   }
@@ -961,7 +968,7 @@ function analyzeTree(text, opts){
       if(!p.ordinances.CONL) missing.push('confirmation');
       if(!p.ordinances.ENDL) missing.push('endowment');
       if(missing.length){
-        findings.push({level:'warn', type:'missingOrdinances', params:[p.name, missing]});
+        findings.push({level:'warn', type:'missingOrdinances', params:[p.name, missing], pid:p.id});
       }
     });
   }
@@ -969,9 +976,9 @@ function analyzeTree(text, opts){
   if(opts.checks.names){
     people.forEach(p=>{
       if(!p.name || p.name.trim().length<3){
-        findings.push({level:'error', type:'incompleteNameRecord', params:[p.id]});
+        findings.push({level:'error', type:'incompleteNameRecord', params:[p.id], pid:p.id});
       } else if(/^[A-Z]\.?\s/.test(p.name) || !/\s/.test(p.name)){
-        findings.push({level:'warn', type:'incompleteNameLooks', params:[p.name]});
+        findings.push({level:'warn', type:'incompleteNameLooks', params:[p.name], pid:p.id});
       }
     });
   }
@@ -981,7 +988,7 @@ function analyzeTree(text, opts){
       for(let j=i+1;j<people.length;j++){
         const a=people[i], b=people[j];
         if(a.name && b.name && a.name===b.name && a.birt===b.birt){
-          findings.push({level:'error', type:'duplicate', params:[a.name, a.birt||'?', a.id, b.id]});
+          findings.push({level:'error', type:'duplicate', params:[a.name, a.birt||'?', a.id, b.id], pid:a.id});
         }
       }
     }
@@ -996,16 +1003,16 @@ function analyzeTree(text, opts){
           const child = indis[cid];
           if(child && child.birt && parent.birt){
             if(child.birt <= parent.birt){
-              findings.push({level:'error', type:'childBeforeParent', params:[child.name||cid, child.birt, parent.name, parent.birt]});
+              findings.push({level:'error', type:'childBeforeParent', params:[child.name||cid, child.birt, parent.name, parent.birt], pid:cid});
             } else if(child.birt - parent.birt < 13){
-              findings.push({level:'warn', type:'childTooClose', params:[child.name||cid, child.birt-parent.birt, parent.name]});
+              findings.push({level:'warn', type:'childTooClose', params:[child.name||cid, child.birt-parent.birt, parent.name], pid:cid});
             }
           }
         });
       });
       [husb,wife].filter(Boolean).forEach(spouse=>{
         if(f.marr && spouse.birt && f.marr < spouse.birt){
-          findings.push({level:'error', type:'marriageBeforeBirth', params:[spouse.name, f.marr, spouse.birt]});
+          findings.push({level:'error', type:'marriageBeforeBirth', params:[spouse.name, f.marr, spouse.birt], pid:spouse.id});
         }
       });
     });
@@ -1098,7 +1105,7 @@ function templeOpportunities(indis, fams, genMap, maxGen){
     if(!needed) return;
 
     const rec = {
-      id:p.id, name:p.name || '—', birt:p.birt, deat:p.deat,
+      id:p.id, fsid:p.fsid, name:p.name || '—', birt:p.birt, deat:p.deat,
       slots, needed, child:diedAChild
     };
     // Recent enough that a close relative must give permission first.
@@ -1144,6 +1151,17 @@ const LEVEL_COLOR    = { error:'var(--st-critical)', warn:'var(--st-warning)', o
 // A finding is rendered as three separate fields — who it is, what is wrong, and
 // the evidence — rather than one run-on sentence, so the eye can scan a column
 // of names instead of reading every line.
+// FamilySearch keeps a stable id for every person (_FSFTID in the file), so a name
+// can link straight to that person's page. Verified format; if the reader isn't
+// signed in, FamilySearch asks them to and then delivers them to the right person.
+const FS_PERSON_URL = 'https://www.familysearch.org/tree/person/details/';
+function fsLink(fsid, label, cls){
+  const safe = String(label==null?'':label).replace(/[&<>"]/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));
+  if(!fsid) return `<span class="${cls}">${safe}</span>`;
+  return `<a class="${cls} fslink" href="${FS_PERSON_URL}${encodeURIComponent(fsid)}"
+     target="_blank" rel="noopener" title="${safe} — FamilySearch">${safe}<span class="fsarrow">↗</span></a>`;
+}
+
 function describeFinding(f, lang){
   const L = LANG[lang], iss = L.ui.iss, w = L.ui.w, ordName = L.ui.ord;
   const p = f.params;
@@ -1380,7 +1398,7 @@ function renderTemple(result){
     }).join('');
     el.innerHTML = `
       <div class="pcard-top">
-        <span class="pcard-name">${p.name}</span>
+        ${fsLink(p.fsid, p.name, 'pcard-name')}
         <span class="pcard-yrs">${yrs}</span>
         <span class="pcard-need">${t.needsN.replace('{n}', p.needed)}</span>
       </div>
@@ -1489,7 +1507,7 @@ function renderReport(result){
         if(d.subject){
           row.innerHTML = `
             <div class="row-top">
-              <span class="row-who">${d.subject}</span>
+              ${fsLink(lastResult.indis?.[f.pid]?.fsid, d.subject, 'row-who')}
               ${d.meta ? `<span class="row-meta">${d.meta}</span>` : ''}
             </div>
             <div class="row-issue">${d.issue}</div>
