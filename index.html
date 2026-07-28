@@ -1481,6 +1481,15 @@ function renderTemple(result){
   const tally = {};
   searched.forEach(p=>p.slots.forEach(s=>{ if(s.state==='need') tally[s.key]=(tally[s.key]||0)+1; }));
 
+  // Sample and typed-in trees carry no FamilySearch ids, so their names link to a
+  // search rather than a record. Say so, or the difference looks like a bug.
+  if(!Object.values(result.indis).some(p=>p.fsid)){
+    const n = document.createElement('div');
+    n.className = 'fsnote';
+    n.textContent = t.noFsNote;
+    box.querySelector('#templeTally').insertAdjacentElement('afterend', n);
+  }
+
   const list      = box.querySelector('#templeList');
   const tallyHost = box.querySelector('#templeTally');
   const bigN      = box.querySelector('#templeN');
