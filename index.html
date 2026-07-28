@@ -1401,7 +1401,10 @@ document.getElementById('savedOpen').addEventListener('click', async ()=>{
 document.getElementById('savedDownload').addEventListener('click', async ()=>{
   const rec = await readTree();
   if(!rec || !rec.text) return;
-  downloadBlob(rec.text, rec.fileName || ('family-tree-' + stamp() + '.ged'), 'text/plain;charset=utf-8');
+  // Reading the file as text strips the UTF-8 byte-order mark. Ancestral Quest
+  // writes one, so put it back and the copy is byte-identical to what they uploaded.
+  const body = rec.text.charCodeAt(0) === 0xFEFF ? rec.text : '\uFEFF' + rec.text;
+  downloadBlob(body, rec.fileName || ('family-tree-' + stamp() + '.ged'), 'text/plain;charset=utf-8');
 });
 
 document.getElementById('savedForget').addEventListener('click', async ()=>{
